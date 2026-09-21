@@ -83,6 +83,37 @@ export function IconCheck(props: IconProps) {
   );
 }
 
+export function IconClock(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
+    </svg>
+  );
+}
+
+export function IconLock(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </svg>
+  );
+}
+
+export function IconList(props: IconProps) {
+  return (
+    <svg {...base(props)}>
+      <line x1="8" x2="21" y1="6" y2="6" />
+      <line x1="8" x2="21" y1="12" y2="12" />
+      <line x1="8" x2="21" y1="18" y2="18" />
+      <line x1="3" x2="3.01" y1="6" y2="6" />
+      <line x1="3" x2="3.01" y1="12" y2="12" />
+      <line x1="3" x2="3.01" y1="18" y2="18" />
+    </svg>
+  );
+}
+
 export function IconCalculator(props: IconProps) {
   return (
     <svg {...base(props)}>

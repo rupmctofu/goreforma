@@ -4,6 +4,7 @@ import "./globals.css";
 import { siteConfig } from "@/seo/site";
 import { Header } from "@/components/layout/header";
 import { Footer } from "@/components/layout/footer";
+import { MobileCta } from "@/components/layout/mobile-cta";
 
 const montserrat = Montserrat({
   variable: "--font-montserrat",
@@ -69,6 +70,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
+        <MobileCta />
       </body>
     </html>
   );

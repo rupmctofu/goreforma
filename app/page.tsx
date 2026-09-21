@@ -3,7 +3,14 @@ import { calculate } from "@/calculators/engine";
 import { calculators } from "@/calculators/registry";
 import { formatEUR } from "@/lib/format";
 import { siteConfig } from "@/seo/site";
-import { CalculatorIcon, IconArrowRight, IconCheck } from "@/components/icons";
+import {
+  CalculatorIcon,
+  IconArrowRight,
+  IconCheck,
+  IconClock,
+  IconList,
+  IconLock,
+} from "@/components/icons";
 import { Accordion } from "@/components/ui/accordion";
 import { Badge, Card } from "@/components/ui/card";
 import { buttonVariants, buttonVariantsInverted } from "@/components/ui/button";
@@ -107,13 +114,14 @@ export default function Home() {
         />
         <Container className="relative grid items-center gap-12 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:py-28">
           <div className="animate-fade-up">
-            <Badge>Precios de referencia en España, sin registro</Badge>
+            <Badge>Estimación gratuita y sin registro</Badge>
             <h1 className="mt-5 max-w-xl text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl">
-              ¿Cuánto puede costar tu <span className="text-accent-600">reforma?</span>
+              ¿Cuánto cuesta reformar tu <span className="text-accent-600">casa?</span>
             </h1>
             <p className="mt-5 max-w-lg text-lg leading-8 text-muted-foreground">
-              Calcula una estimación orientativa del coste de tu reforma en
-              pocos minutos. Baños, cocinas, reformas integrales y pintura.
+              Descubre en menos de 2 minutos cuánto puede costar la reforma de tu casa:
+              baño, cocina, reforma integral o pintura. Compara niveles de calidad y
+              hazte una idea clara antes de pedir presupuestos.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <TrackedLink
@@ -121,7 +129,7 @@ export default function Home() {
                 calculator={calculators[0].id}
                 className={buttonVariants({ variant: "primary", size: "lg" })}
               >
-                Calcular mi reforma
+                Calcular el coste de mi reforma
                 <IconArrowRight className="size-4" />
               </TrackedLink>
               <a
@@ -132,7 +140,7 @@ export default function Home() {
               </a>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-              {["Resultado en 2 minutos", "3 niveles de calidad", "Desglose por partidas"].map((item) => (
+              {["Resultado en menos de 2 minutos", "3 niveles de calidad", "Desglose por partidas"].map((item) => (
                 <li key={item} className="flex items-center gap-2">
                   <IconCheck className="size-4 text-accent-600" />
                   {item}
@@ -163,6 +171,41 @@ export default function Home() {
                 Calidad media, muebles, encimera y electrodomésticos incluidos.
               </p>
             </div>
+          </div>
+        </Container>
+      </section>
+
+      {/* Propuesta de valor */}
+      <section className="border-y border-slate-200/70 bg-white/60 py-12">
+        <Container>
+          <div className="grid gap-6 md:grid-cols-3">
+            {[
+              {
+                icon: IconClock,
+                title: "Resultado en menos de 2 minutos",
+                text: "Responde unas preguntas sobre tu reforma y obtén un rango orientativo al instante.",
+              },
+              {
+                icon: IconLock,
+                title: "Sin registro ni formularios",
+                text: "No te pedimos email ni datos para calcular. Guardar la estimación es opcional y siempre después del resultado.",
+              },
+              {
+                icon: IconList,
+                title: "Desglose transparente por partidas",
+                text: "Cada concepto muestra su unidad y sus hipótesis de cálculo, con la fecha de actualización del catálogo.",
+              },
+            ].map(({ icon: Icon, title, text }) => (
+              <div key={title} className="flex items-start gap-4">
+                <span className="flex size-11 shrink-0 items-center justify-center rounded-2xl bg-accent-50 text-accent-600 ring-1 ring-accent-100">
+                  <Icon className="size-5" />
+                </span>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">{title}</h3>
+                  <p className="mt-1.5 text-sm leading-6 text-muted-foreground">{text}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </Container>
       </section>
