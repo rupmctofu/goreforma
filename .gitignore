@@ -55,5 +55,6 @@ prisma/*.db-journal
 .atl/
 .neon
 
-.vercel
-.env*
+# volcados de env locales (nunca subir)
+prod-env.txt
+undefined/
