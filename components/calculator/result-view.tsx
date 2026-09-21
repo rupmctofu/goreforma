@@ -1,6 +1,7 @@
 import type { EstimationResult } from "@/calculators/types";
 import { formatEUR, formatNumber, roundToStep } from "@/lib/format";
 import { QUALITY_LABELS } from "@/calculators/types";
+import { CopyButton } from "@/components/ui/copy-button";
 
 const UNIT_LABELS: Record<string, string> = {
   m2: "m²",
@@ -8,6 +9,16 @@ const UNIT_LABELS: Record<string, string> = {
   unidad: "unid.",
   global: "global",
 };
+
+function Quantity({ item }: { item: EstimationResult["breakdown"][number] }) {
+  const unit = item.unit ? UNIT_LABELS[item.unit] : "";
+  return (
+    <span>
+      {formatNumber(item.quantity)}{" "}
+      <span className="text-xs text-muted-foreground">{unit}</span>
+    </span>
+  );
+}
 
 function StepBadge({ children }: { children: React.ReactNode }) {
   return (
@@ -84,7 +95,11 @@ export function ResultView({
           {calculatorName} · Calidad {QUALITY_LABELS[estimate.quality].toLowerCase()}
         </StepBadge>
 
-        <div className="mt-6 flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
+        <h2 className="mt-4 text-sm font-semibold uppercase tracking-wide text-slate-500">
+          Estimación orientativa
+        </h2>
+
+        <div className="mt-2 flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
           <span className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
             {formatEUR(roundToStep(estimate.min))}
           </span>
@@ -95,7 +110,7 @@ export function ResultView({
         </div>
 
         <p className="mt-2 text-sm text-muted-foreground">
-          Rango orientativo · estimación media{" "}
+          Rango calculado a partir de los datos que has indicado. Estimación media{" "}
           <span className="font-semibold text-slate-800">
             {formatEUR(roundToStep(estimate.avg))}
           </span>{" "}
@@ -117,20 +132,25 @@ export function ResultView({
         <div className="rounded-2xl border border-accent-100 bg-accent-50 p-5">
           <h3 className="font-bold text-slate-900">Guarda este enlace</h3>
           <p className="mt-1 text-sm leading-6 text-muted-foreground">
-            Puedes volver a consultar esta estimación mientras el enlace siga vigente.
+            Es la única forma de volver a consultar esta estimación más adelante.
           </p>
-          <a
-            href={recoveryUrl}
-            className="mt-3 inline-flex text-sm font-semibold text-accent-700 underline underline-offset-4"
-          >
-            Abrir la estimación guardada
-          </a>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <CopyButton text={typeof window !== "undefined" ? `${window.location.origin}${recoveryUrl}` : recoveryUrl} />
+            <a
+              href={recoveryUrl}
+              className="text-sm font-semibold text-accent-700 underline underline-offset-4"
+            >
+              Abrir la estimación guardada
+            </a>
+          </div>
         </div>
       )}
 
       <div className="rounded-[2rem] border border-slate-200 bg-white p-6 sm:p-8">
         <h3 className="text-lg font-bold text-slate-900">Desglose estimado</h3>
-        <div className="mt-4 overflow-x-auto">
+
+        {/* Vista de escritorio */}
+        <div className="mt-4 hidden overflow-x-auto sm:block">
           <table className="w-full text-left text-sm">
             <thead>
               <tr className="border-b border-slate-100 text-xs uppercase tracking-wide text-muted-foreground">
@@ -149,7 +169,7 @@ export function ResultView({
                     </span>
                   </td>
                   <td className="py-3 pr-4 text-slate-700">
-                    {formatNumber(item.quantity)}
+                    <Quantity item={item} />
                   </td>
                   <td className="py-3 text-right font-medium text-slate-900">
                     {formatEUR(roundToStep(item.min))} – {formatEUR(roundToStep(item.max))}
@@ -158,6 +178,26 @@ export function ResultView({
               ))}
             </tbody>
           </table>
+        </div>
+
+        {/* Vista móvil */}
+        <div className="mt-4 space-y-3 sm:hidden">
+          {estimate.breakdown.map((item) => (
+            <div
+              key={item.subcategory}
+              className="rounded-2xl border border-slate-100 bg-slate-50/50 p-4"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <span className="font-semibold text-slate-900">{item.label}</span>
+                <span className="text-sm font-medium text-slate-900">
+                  {formatEUR(roundToStep(item.min))} – {formatEUR(roundToStep(item.max))}
+                </span>
+              </div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                <Quantity item={item} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 

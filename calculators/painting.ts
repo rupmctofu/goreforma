@@ -74,7 +74,7 @@ export const paintingCalculator: CalculatorDefinition = {
     },
     {
       id: "area",
-      title: "Metros",
+      title: "Superficie",
       question: "¿Cuántos m² vas a pintar en total?",
       fieldType: "number",
       unit: "m²",

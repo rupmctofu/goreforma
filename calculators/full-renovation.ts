@@ -88,8 +88,8 @@ export const fullRenovationCalculator: CalculatorDefinition = {
     },
     {
       id: "area",
-      title: "Metros",
-      question: "¿Cuántos metros tiene la vivienda?",
+      title: "Superficie",
+      question: "¿Cuántos m² construidos tiene la vivienda?",
       fieldType: "number",
       unit: "m²",
       min: 20,

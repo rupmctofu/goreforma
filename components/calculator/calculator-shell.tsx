@@ -75,7 +75,7 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
   const [estimate, setEstimate] = useState<EstimationResult | null>(null);
   const [estimationId, setEstimationId] = useState<string | null>(null);
   const [recoveryUrl, setRecoveryUrl] = useState<string | null>(null);
-  const [calculationError, setCalculationError] = useState<string | null>(null);
+  const [calculationErrors, setCalculationErrors] = useState<string[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
   const [elementsTouched, setElementsTouched] = useState(false);
   const hasSentStart = useRef(false);
@@ -124,6 +124,7 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
   function goBack() {
     if (estimate) {
       setEstimate(null);
+      setCalculationErrors([]);
       return;
     }
     if (stepIndex > 0) setStepIndex(stepIndex - 1);
@@ -144,7 +145,7 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
       return;
     }
     if (!calculator) return;
-    setCalculationError(null);
+    setCalculationErrors([]);
     setIsCalculating(true);
     try {
       const response = await fetch("/api/estimations", {
@@ -157,8 +158,19 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
         id?: string;
         recoveryUrl?: string;
         error?: string;
+        errors?: Record<string, string>;
       };
       if (!response.ok || !payload.result) {
+        if (response.status === 429) {
+          throw new Error("Has enviado demasiadas peticiones. Espera un minuto e inténtalo de nuevo.");
+        }
+        if (response.status === 413) {
+          throw new Error("La petición es demasiado grande. Revisa los datos e inténtalo de nuevo.");
+        }
+        if (payload.errors && Object.keys(payload.errors).length > 0) {
+          setCalculationErrors(Object.values(payload.errors));
+          throw new Error("Corrige los errores del formulario para continuar.");
+        }
         throw new Error(payload.error ?? "No se pudo calcular la estimación.");
       }
       setEstimate(payload.result);
@@ -167,11 +179,8 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
       trackCalculatorCompleted(calculator.id);
       trackResultViewed(calculator.id);
     } catch (error) {
-      setCalculationError(
-        error instanceof Error
-          ? error.message
-          : "No se pudo calcular la estimación. Inténtalo de nuevo.",
-      );
+      const message = error instanceof Error ? error.message : "No se pudo calcular la estimación. Inténtalo de nuevo.";
+      setCalculationErrors((prev) => (prev.length > 0 ? prev : [message]));
     } finally {
       setIsCalculating(false);
     }
@@ -199,7 +208,7 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
         <div id="guardar-estimacion" className="scroll-mt-24">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-extrabold tracking-tight text-slate-900">
-              Guarda tu estimación
+              Guardar tu estimación
             </h2>
             <span className="hidden text-sm text-muted-foreground sm:block">
               Opcional · solo con email
@@ -343,39 +352,56 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
 
         {step.fieldType === "multi_choice" && (
           <div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {step.options?.map((option) => {
-                const checked = Array.isArray(answers[step.id]) &&
-                  (answers[step.id] as string[]).includes(option.id);
-                return (
-                  <button
-                    type="button"
-                    role="checkbox"
-                    aria-checked={checked}
-                    key={option.id}
-                    onClick={() => toggleElement(option.id)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-2xl border p-4 text-left transition-all duration-150",
-                      checked
-                        ? "border-accent-500 bg-accent-50 ring-1 ring-accent-500/20"
-                        : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50",
-                    )}
-                  >
-                    <span
-                      className={cn(
-                        "flex size-5 shrink-0 items-center justify-center rounded-md border",
-                        checked
-                          ? "border-accent-500 bg-accent-500 text-white"
-                          : "border-slate-300 text-transparent",
-                      )}
-                    >
-                      <IconCheck className="size-3" />
-                    </span>
-                    <span className="text-sm font-semibold text-slate-900">{option.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            {(() => {
+              const defaults = calculator.getDefaultElements?.(answers) ?? [];
+              const current = Array.isArray(answers[step.id]) ? (answers[step.id] as string[]) : [];
+              const showDefaultHint =
+                !elementsTouched &&
+                defaults.length > 0 &&
+                defaults.length === current.length &&
+                defaults.every((id) => current.includes(id));
+              return (
+                <>
+                  {showDefaultHint && (
+                    <p className="mb-3 text-sm font-medium text-accent-700">
+                      Elementos incluidos por defecto; puedes quitar los que no apliquen.
+                    </p>
+                  )}
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    {step.options?.map((option) => {
+                      const checked = current.includes(option.id);
+                      return (
+                        <button
+                          type="button"
+                          role="checkbox"
+                          aria-checked={checked}
+                          key={option.id}
+                          onClick={() => toggleElement(option.id)}
+                          className={cn(
+                            "flex items-center gap-3 rounded-2xl border p-4 text-left transition-all duration-150",
+                            checked
+                              ? "border-accent-500 bg-accent-50 ring-1 ring-accent-500/20"
+                              : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50",
+                          )}
+                        >
+                          <span
+                            className={cn(
+                              "flex size-5 shrink-0 items-center justify-center rounded-md border",
+                              checked
+                                ? "border-accent-500 bg-accent-500 text-white"
+                                : "border-slate-300 text-transparent",
+                            )}
+                          >
+                            <IconCheck className="size-3" />
+                          </span>
+                          <span className="text-sm font-semibold text-slate-900">{option.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </>
+              );
+            })()}
             {step.help && (
               <p className="mt-3 text-sm text-muted-foreground">{step.help}</p>
             )}
@@ -403,10 +429,15 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
           <IconArrowRight className="size-4" />
         </Button>
       </div>
-      {calculationError && (
-        <p className="mt-4 text-center text-sm text-red-600" role="alert">
-          {calculationError}
-        </p>
+      {calculationErrors.length > 0 && (
+        <div className="mt-4 rounded-2xl border border-red-100 bg-red-50 p-4 text-sm text-red-700" role="alert">
+          <p className="font-semibold">No se pudo calcular la estimación:</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            {calculationErrors.map((err, idx) => (
+              <li key={idx}>{err}</li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );

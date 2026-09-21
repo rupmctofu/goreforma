@@ -89,6 +89,7 @@ export function LeadForm({ calculatorId, calculatorName, estimationId }: LeadFor
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Hemos asociado tus datos a la estimación de <strong>{calculatorName}</strong>.
           No se enviarán presupuestos ni contactos profesionales automáticamente.
+          Guarda el enlace de esta página si quieres volver a consultar la estimación.
         </p>
       </div>
     );
@@ -99,8 +100,9 @@ export function LeadForm({ calculatorId, calculatorName, estimationId }: LeadFor
       <div>
         <h3 className="text-lg font-bold text-slate-900">Guarda tu estimación</h3>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          Es opcional: tu rango ya está en pantalla. Déjanos tu email y te lo
-          guardamos para que lo recuperes cuando quieras.
+          Es opcional: tu rango ya está en pantalla. Si dejas tu email guardamos
+          tus datos junto a esta estimación. La recuperación sigue siendo a través
+          del enlace de esta página.
         </p>
       </div>
 

@@ -88,8 +88,8 @@ export const bathCalculator: CalculatorDefinition = {
     },
     {
       id: "area",
-      title: "Metros",
-      question: "¿Cuántos metros tiene el baño?",
+      title: "Superficie",
+      question: "¿Cuántos m² tiene el baño?",
       fieldType: "number",
       unit: "m²",
       min: 1,

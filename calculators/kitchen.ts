@@ -89,8 +89,8 @@ export const kitchenCalculator: CalculatorDefinition = {
     },
     {
       id: "area",
-      title: "Metros",
-      question: "¿Cuántos metros tiene la cocina?",
+      title: "Superficie",
+      question: "¿Cuántos m² tiene la cocina?",
       fieldType: "number",
       unit: "m²",
       min: 1,

@@ -18,6 +18,15 @@ function hashToken(token: string): string {
   return createHash("sha256").update(token).digest("hex");
 }
 
+function formatExpiry(date: Date | null): string {
+  if (!date) return "no caduca";
+  return date.toLocaleDateString("es-ES", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 export default async function EstimationPage({
   params,
 }: {
@@ -46,13 +55,14 @@ export default async function EstimationPage({
           Tu estimación de {calculator.name.toLowerCase()}
         </h1>
         <p className="mt-3 text-sm leading-6 text-muted-foreground">
-          Este enlace muestra el cálculo guardado con el catálogo {estimation.catalogVersion}
-          y el algoritmo {estimation.algorithmVersion}.
+          Este enlace muestra el cálculo guardado con el catálogo {estimation.catalogVersion}.
+          Válido hasta el {formatExpiry(estimation.recoveryTokenExpiresAt)}.
         </p>
         <div className="mt-8">
           <ResultView
             estimate={estimation.result as unknown as EstimationResult}
             calculatorName={calculator.name}
+            recoveryUrl={`/estimacion/${token}`}
           />
         </div>
       </Container>

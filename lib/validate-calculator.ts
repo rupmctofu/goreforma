@@ -1,4 +1,4 @@
-import type { Answers, CalculatorDefinition } from "@/calculators/types";
+import type { AnswerValue, Answers, CalculatorDefinition } from "@/calculators/types";
 
 export type CalculatorValidation =
   | { ok: true; answers: Answers }
@@ -6,6 +6,15 @@ export type CalculatorValidation =
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
+}
+
+function parseAnswerNumber(value: AnswerValue | undefined): number | null {
+  if (typeof value === "number") return value;
+  if (typeof value === "string" && value.trim() !== "") {
+    const n = Number(value.replace(",", "."));
+    return Number.isFinite(n) ? n : null;
+  }
+  return null;
 }
 
 export function validateCalculatorAnswers(
@@ -35,13 +44,8 @@ export function validateCalculatorAnswers(
     }
 
     if (step.fieldType === "number") {
-      const numeric =
-        typeof answer === "number"
-          ? answer
-          : typeof answer === "string" && answer.trim() !== ""
-            ? Number(answer.replace(",", "."))
-            : Number.NaN;
-      if (!Number.isFinite(numeric)) {
+      const numeric = parseAnswerNumber(answer);
+      if (numeric === null) {
         errors[step.id] = "Introduce un número válido.";
       } else if (step.min !== undefined && numeric < step.min) {
         errors[step.id] = `El valor mínimo es ${step.min}.`;
@@ -59,6 +63,18 @@ export function validateCalculatorAnswers(
     const validOptions = new Set(step.options?.map((option) => option.id));
     if (answer.some((item) => !validOptions.has(item))) {
       errors[step.id] = "Hay elementos seleccionados no válidos.";
+    }
+  }
+
+  // Validaciones de dependencias entre respuestas.
+  const elements = Array.isArray(answers.elements) ? (answers.elements as string[]) : [];
+  if (elements.includes("pintura_especial")) {
+    const area = parseAnswerNumber(answers.area);
+    const specialArea = parseAnswerNumber(answers.special_area);
+    if (specialArea === null || specialArea <= 0) {
+      errors.special_area = "Indica cuántos m² de baño o cocina vas a pintar con pintura especial.";
+    } else if (area !== null && specialArea > area) {
+      errors.special_area = "La superficie especial no puede ser mayor que la superficie total.";
     }
   }
 
