@@ -53,7 +53,8 @@ export function Footer() {
           Las estimaciones de GoReforma son orientativas y no constituyen un presupuesto ni
           un contrato. Los importes mostrados son de referencia para el mercado español y pueden
           variar según la zona, el estado real de la vivienda y el profesional contratado.
-          Precios actualizados a la fecha de publicación del catálogo.
+           El catálogo actual contiene datos provisionales de prototipo y no debe
+           utilizarse para tomar decisiones económicas.
         </p>
       </Container>
     </footer>

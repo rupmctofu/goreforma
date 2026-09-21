@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { trackLeadFormStarted, trackLeadSubmitted } from "@/lib/analytics";
 import { Button } from "../ui/button";
 import { IconCheck } from "../icons";
@@ -8,24 +9,26 @@ import { IconCheck } from "../icons";
 interface LeadFormProps {
   calculatorId: string;
   calculatorName: string;
-  estimatedBudget?: number;
+  estimationId?: string;
 }
 
-type Errors = Partial<Record<"name" | "email" | "phone" | "postalCode", string>>;
+type Errors = Partial<Record<"name" | "email" | "phone" | "postalCode" | "consentGiven" | "website", string>>;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_RE = /^[+()\d\s.-]{9,15}$/;
 const POSTAL_RE = /^\d{5}$/;
 
-export function LeadForm({ calculatorId, calculatorName, estimatedBudget }: LeadFormProps) {
+export function LeadForm({ calculatorId, calculatorName, estimationId }: LeadFormProps) {
   const [form, setForm] = useState({
     name: "",
     email: "",
     phone: "",
     postalCode: "",
+    website: "",
   });
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
+  const [consentGiven, setConsentGiven] = useState(false);
 
   useEffect(() => {
     trackLeadFormStarted(calculatorId);
@@ -47,6 +50,7 @@ export function LeadForm({ calculatorId, calculatorName, estimatedBudget }: Lead
       next.phone = "Introduce un teléfono válido.";
     if (form.postalCode.trim() !== "" && !POSTAL_RE.test(form.postalCode.trim()))
       next.postalCode = "Debe tener 5 dígitos.";
+    if (!consentGiven) next.consentGiven = "Acepta la política de privacidad para continuar.";
 
     setErrors(next);
     if (Object.keys(next).length > 0) return;
@@ -62,7 +66,9 @@ export function LeadForm({ calculatorId, calculatorName, estimatedBudget }: Lead
           phone: form.phone.trim(),
           postalCode: form.postalCode.trim() || undefined,
           projectType: calculatorName,
-          estimatedBudget: estimatedBudget ? Math.round(estimatedBudget).toString() : "",
+          estimationId,
+          consentGiven,
+          website: form.website,
         }),
       });
       if (!res.ok) throw new Error("error");
@@ -81,8 +87,8 @@ export function LeadForm({ calculatorId, calculatorName, estimatedBudget }: Lead
         </span>
         <p className="mt-4 text-lg font-bold text-slate-900">Estimación guardada</p>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Hemos guardado la estimación de <strong>{calculatorName}</strong> ({estimatedBudget !== undefined ? `${Math.round(estimatedBudget).toLocaleString("es-ES")} € (media)` : "rango orientativo"}).
-          Te avisaremos cuando haya profesionales disponibles para tu tipo de reforma.
+          Hemos asociado tus datos a la estimación de <strong>{calculatorName}</strong>.
+          No se enviarán presupuestos ni contactos profesionales automáticamente.
         </p>
       </div>
     );
@@ -164,6 +170,33 @@ export function LeadForm({ calculatorId, calculatorName, estimatedBudget }: Lead
           <span className="mt-1 block text-xs text-red-600">{errors.postalCode}</span>
         )}
       </label>
+
+      <label className="mt-4 flex items-start gap-2 text-xs leading-5 text-muted-foreground">
+        <input
+          type="checkbox"
+          checked={consentGiven}
+          onChange={(event) => setConsentGiven(event.target.checked)}
+          className="mt-1 size-4 shrink-0 accent-accent-600"
+        />
+        <span>
+          Acepto la <Link href="/privacidad" className="underline">política de privacidad</Link>
+          y que estos datos se asocien a esta estimación.
+        </span>
+      </label>
+      {errors.consentGiven && (
+        <p className="mt-1 text-xs text-red-600" role="alert">{errors.consentGiven}</p>
+      )}
+
+      <input
+        type="text"
+        name="website"
+        value={form.website}
+        onChange={(event) => set("website", event.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        className="absolute -left-[9999px] size-px opacity-0"
+      />
 
       <Button type="submit" size="lg" className="mt-6 w-full" disabled={status === "submitting"}>
         {status === "submitting" ? "Guardando…" : "Guardar mi estimación"}

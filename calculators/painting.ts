@@ -47,6 +47,12 @@ function getArea(answers: Answers): number {
   return Number.isFinite(n) && n > 0 ? n : 60;
 }
 
+function getSpecialArea(answers: Answers): number {
+  const raw = answers["special_area"];
+  const n = typeof raw === "number" ? raw : Number(raw);
+  return Number.isFinite(n) && n >= 0 ? n : 0;
+}
+
 export const paintingCalculator: CalculatorDefinition = {
   id: "painting",
   slug: "calculadora-pintar-piso",
@@ -84,8 +90,20 @@ export const paintingCalculator: CalculatorDefinition = {
       question: "¿Qué extras quieres incluir?",
       fieldType: "multi_choice",
       help: "El precio base ya incluye la pintura de la superficie elegida. Marca aquí los trabajos adicionales.",
-      options: ELEMENT_OPTIONS,
-    },
+        options: ELEMENT_OPTIONS,
+      },
+      {
+        id: "special_area",
+        title: "Superficie especial",
+        question: "¿Cuántos m² corresponden a baños o cocina?",
+        fieldType: "number",
+        unit: "m²",
+        min: 0,
+        max: 500,
+        optional: true,
+        placeholder: "P. ej. 20",
+        help: "Solo se usa si marcas pintura especial para baños y cocinas.",
+      },
   ],
   buildLineItems(answers): LinearQuantity[] {
     const area = getArea(answers);
@@ -93,12 +111,13 @@ export const paintingCalculator: CalculatorDefinition = {
     const selected = getElements(answers);
 
     const items: LinearQuantity[] = [];
+    const surfaceArea = scope === "paredes_techos" ? area / 2 : area;
     if (scope === "paredes" || scope === "paredes_techos") {
       items.push({
         label: "Pintura de paredes",
         subcategory: "pintura_paredes",
         unit: "m2",
-        quantity: area,
+        quantity: surfaceArea,
         note: "Material y mano de obra incluidos.",
       });
     }
@@ -107,7 +126,7 @@ export const paintingCalculator: CalculatorDefinition = {
         label: "Pintura de techos",
         subcategory: "pintura_techos",
         unit: "m2",
-        quantity: area,
+        quantity: surfaceArea,
         note: "Material y mano de obra incluidos.",
       });
     }
@@ -129,12 +148,14 @@ export const paintingCalculator: CalculatorDefinition = {
       });
     }
     if (selected.includes("pintura_especial")) {
+      const specialArea = getSpecialArea(answers);
+      if (specialArea <= 0) return items;
       items.push({
         label: "Pintura especial para baños y cocinas",
         subcategory: "pintura_especial",
         unit: "m2",
-        quantity: 20,
-        note: "Se estiman 20 m² entre baño y cocina.",
+        quantity: specialArea,
+        note: "Superficie indicada para baños y cocina.",
       });
     }
     return items;
@@ -142,11 +163,12 @@ export const paintingCalculator: CalculatorDefinition = {
   buildAssumptions(answers): string[] {
     const scope = getScope(answers);
     return [
-      `La superficie marcada son ${getArea(answers)} m² de ${scope === "paredes_techos" ? "paredes y techos" : scope}.`,
+      `La superficie total indicada son ${getArea(answers)} m² de ${scope === "paredes_techos" ? "paredes y techos, repartidos al 50% para la estimación" : scope}.`,
       "El precio por m² incluye pintura y mano de obra de un profesional.",
       "Para techos con mucha altura o trabajos en altura el precio puede aumentar.",
       "Los muebles y el llenado de la vivienda no están incluidos.",
     ];
   },
+  getDefaultElements: () => [],
   updatedAt: CATALOG_UPDATED_AT,
 };

@@ -10,7 +10,7 @@ export const CALCULATOR_CONTENT: Record<string, CalculatorContent> = {
   "calculadora-reforma-bano": {
     metaTitle: "Calculadora de reforma de baño: precio orientativo",
     metaDescription:
-      "Calcula cuánto cuesta reformar un baño en España según metros, calidad y elementos. Estimación orientativa por partidas en menos de 2 minutos.",
+      "Explora una estimación provisional del coste de reformar un baño según metros, calidad y elementos. Resultado orientativo por partidas.",
     intro:
       "Reformar un baño es una de las obras más habituales y también una de las que más varía de precio según el estado de las instalaciones y los acabados elegidos. En esta calculadora puedes partir del alcance que quieres (reforma completa, suelo y azulejos, sanitarios o mueble) e ir ajustando los metros y los elementos a cambiar para obtener un rango orientativo por partidas.",
     highlights: [
@@ -39,7 +39,7 @@ export const CALCULATOR_CONTENT: Record<string, CalculatorContent> = {
   "calculadora-reforma-cocina": {
     metaTitle: "Calculadora de reforma de cocina: precio orientativo",
     metaDescription:
-      "Calcula cuánto cuesta reformar una cocina en España según metros, muebles, encimera y electrodomésticos. Rango orientativo por partidas al instante.",
+      "Explora una estimación provisional del coste de reformar una cocina según metros, muebles, encimera y electrodomésticos.",
     intro:
       "La cocina concentra muchas partidas distintas: muebles, encimera, electrodomésticos, fontanería, electricidad y revestimientos. Esta calculadora te permite elegir entre una cocina completa o cambios parciales (solo muebles, solo electrodomésticos o solo encimera) y ajustar la superficie para estimar los metros lineales de mobiliario.",
     highlights: [
@@ -68,7 +68,7 @@ export const CALCULATOR_CONTENT: Record<string, CalculatorContent> = {
   "calculadora-reforma-integral": {
     metaTitle: "Calculadora de reforma integral: precio por m²",
     metaDescription:
-      "Calcula cuánto cuesta una reforma integral de vivienda en España según metros construidos y acabados. Estimación orientativa con desglose por partidas.",
+      "Explora una estimación provisional de reforma integral según metros construidos y acabados, con desglose por partidas.",
     intro:
       "Una reforma integral toca toda la vivienda: derribos, instalaciones, suelos, pintura, carpintería y, con frecuencia, cocina y baños. Aquí puedes calcular el coste completo o limitarlo a acabados o a instalaciones, indicando los metros construidos para estimar el número de puertas, baños y superficies de trabajo.",
     highlights: [
@@ -97,7 +97,7 @@ export const CALCULATOR_CONTENT: Record<string, CalculatorContent> = {
   "calculadora-pintar-piso": {
     metaTitle: "Calculadora para pintar un piso: precio por m²",
     metaDescription:
-      "Calcula cuánto cuesta pintar un piso en España según los metros a pintar, el acabado y los trabajos de preparación. Rango orientativo al instante.",
+      "Explora una estimación provisional para pintar una vivienda según superficie, acabado y trabajos de preparación.",
     intro:
       "Pintar es la reforma más rápida y económica, pero el precio cambia mucho según la superficie, el estado de las paredes y si se pintan también los techos. Esta calculadora parte de los metros totales a pintar y permite añadir reparación de grietas, imprimación selladora o pintura específica para zonas húmedas.",
     highlights: [

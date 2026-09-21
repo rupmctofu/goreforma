@@ -4,7 +4,9 @@ export interface LeadInput {
   phone: string;
   postalCode?: string;
   projectType: string;
-  estimatedBudget: string;
+  estimatedBudget?: string;
+  estimationId?: string;
+  consentGiven: boolean;
 }
 
 export interface ValidationResult {
@@ -33,17 +35,23 @@ export function validateLead(input: LeadInput): ValidationResult {
 
   const name = input.name.trim();
   if (name !== "" && name.length < 2) errors.name = "Escribe tu nombre.";
+  if (name.length > 100) errors.name = "El nombre es demasiado largo.";
 
   if (!isEmail(input.email)) errors.email = "Introduce un email válido.";
+  if (input.email.trim().length > 254) errors.email = "El email es demasiado largo.";
 
   const phone = input.phone.trim();
   if (phone !== "" && !isPhone(phone)) errors.phone = "Introduce un teléfono válido.";
+  if (phone.length > 30) errors.phone = "El teléfono es demasiado largo.";
 
   const postalCode = input.postalCode?.trim() ?? "";
   if (postalCode !== "" && !isPostalCode(postalCode))
     errors.postalCode = "El código postal debe tener 5 dígitos.";
 
   if (!input.projectType) errors.projectType = "Falta el tipo de proyecto.";
+  if (input.projectType.trim().length > 100)
+    errors.projectType = "El tipo de proyecto es demasiado largo.";
+  if (!input.consentGiven) errors.consentGiven = "Debes aceptar la política de privacidad.";
 
   return { ok: Object.keys(errors).length === 0, errors };
 }

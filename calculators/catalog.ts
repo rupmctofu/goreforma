@@ -1,4 +1,4 @@
-import type { PriceCatalog, PriceEntry, Unit } from "./types";
+import type { PriceCatalog, PriceEntry, PriceSource, Unit } from "./types";
 
 // ---------------------------------------------------------------------------
 // CATÁLOGO CENTRAL DE PRECIOS
@@ -7,12 +7,13 @@ import type { PriceCatalog, PriceEntry, Unit } from "./types";
 // y probar el flujo del producto, pero NO proceden de fuentes reales de
 // mercado. Cada entrada marca `source: "PLACEHOLDER"`.
 //
-// Cuando se disponga de datos reales, se sustituyen estos valores manteniendo
-// la misma estructura (espejo del modelo Prisma `Price`) y se rellena el campo
-// `updatedAt` con la fecha real de la actualización.
+// Mientras no exista una fuente validada, estos datos solo sirven para probar
+// el flujo. No deben presentarse como precios de mercado ni como datos reales.
 // ---------------------------------------------------------------------------
 
-export const CATALOG_UPDATED_AT = "2026-09-21";
+export const CATALOG_VERSION = "prototype-0";
+export const CATALOG_SOURCE: PriceSource = "PROTOTYPE";
+export const CATALOG_UPDATED_AT: string | null = null;
 
 const REGION = "nacional";
 
@@ -34,7 +35,7 @@ function entry(category: string, input: EntryInput): PriceEntry {
     maxPrice: input.max,
     quality: "MEDIA",
     region: REGION,
-    source: "PLACEHOLDER",
+    source: CATALOG_SOURCE,
     updatedAt: CATALOG_UPDATED_AT,
   };
 }

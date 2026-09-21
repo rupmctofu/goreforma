@@ -12,7 +12,7 @@ export const siteConfig = {
   name: "GoReforma",
   tagline: "¿Cuánto puede costar tu reforma?",
   description:
-    "Calcula una estimación orientativa del coste de tu reforma en minutos. Precios de referencia del mercado español para baños, cocinas, reformas integrales y pintura.",
+    "Descubre cuánto puede costar reformar tu casa antes de empezar. Obtén una estimación orientativa con desglose por partidas.",
   url: siteUrl(),
   locale: "es_ES",
   language: "es",

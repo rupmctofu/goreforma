@@ -188,5 +188,9 @@ export const kitchenCalculator: CalculatorDefinition = {
       "No se incluyen desplazamientos ni imprevistos (tabiques con humedades, instalaciones antiguas).",
     ];
   },
+  getDefaultElements(answers): string[] {
+    const scope = getScope(answers);
+    return SCOPE_DEFAULTS[scope] ?? SCOPE_DEFAULTS.completa;
+  },
   updatedAt: CATALOG_UPDATED_AT,
 };

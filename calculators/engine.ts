@@ -1,4 +1,4 @@
-import { getPriceEntry } from "./catalog";
+import { CATALOG_SOURCE, CATALOG_VERSION, getPriceEntry } from "./catalog";
 import type {
   Answers,
   CalculatorDefinition,
@@ -85,6 +85,8 @@ export function calculate(
     breakdown,
     assumptions: calculator.buildAssumptions(answers),
     updatedAt: calculator.updatedAt,
+    catalogVersion: CATALOG_VERSION,
+    catalogSource: CATALOG_SOURCE,
     disclaimer: DISCLAIMER_ESTIMACION,
   };
 }
@@ -99,6 +101,9 @@ export function canCalculate(
 ): boolean {
   for (const step of calculator.steps) {
     const value = answers[step.id];
+    if (step.optional && (value === undefined || value === null || value === "")) {
+      continue;
+    }
     if (value === undefined || value === null || value === "") return false;
     if (step.fieldType === "number" && step.id === calculator.areaStepId) {
       const n = toNumber(value);

@@ -71,9 +71,11 @@ function RangeBar({ estimate }: { estimate: EstimationResult }) {
 export function ResultView({
   estimate,
   calculatorName,
+  recoveryUrl,
 }: {
   estimate: EstimationResult;
   calculatorName: string;
+  recoveryUrl?: string;
 }) {
   return (
     <div className="animate-step-in space-y-6">
@@ -105,9 +107,26 @@ export function ResultView({
 
         <div className="mx-auto mt-6 flex max-w-md flex-wrap items-center justify-center gap-2 text-xs">
           <StepBadge>{formatNumber(estimate.area)} m²</StepBadge>
-          <StepBadge>Precios {estimate.updatedAt}</StepBadge>
+          <StepBadge>
+            {estimate.updatedAt ? `Catálogo ${estimate.updatedAt}` : "Datos provisionales"}
+          </StepBadge>
         </div>
       </div>
+
+      {recoveryUrl && (
+        <div className="rounded-2xl border border-accent-100 bg-accent-50 p-5">
+          <h3 className="font-bold text-slate-900">Guarda este enlace</h3>
+          <p className="mt-1 text-sm leading-6 text-muted-foreground">
+            Puedes volver a consultar esta estimación mientras el enlace siga vigente.
+          </p>
+          <a
+            href={recoveryUrl}
+            className="mt-3 inline-flex text-sm font-semibold text-accent-700 underline underline-offset-4"
+          >
+            Abrir la estimación guardada
+          </a>
+        </div>
+      )}
 
       <div className="rounded-[2rem] border border-slate-200 bg-white p-6 sm:p-8">
         <h3 className="text-lg font-bold text-slate-900">Desglose estimado</h3>

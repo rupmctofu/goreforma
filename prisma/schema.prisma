@@ -12,6 +12,7 @@ datasource db {
 // Todos los valores actuales son PLACEHOLDER/TODO (no son datos reales de mercado).
 model Price {
   id           String   @id @default(cuid())
+  catalogId    String?
   category     String
   subcategory  String
   unit         String
@@ -23,11 +24,58 @@ model Price {
   source       String // PLACEHOLDER | TODO
   updatedAt    DateTime @default(now()) @updatedAt
 
+  catalog      PriceCatalog? @relation(fields: [catalogId], references: [id], onDelete: SetNull)
+
   @@index([category, subcategory, quality])
+  @@index([catalogId])
+}
+
+model PriceCatalog {
+  id            String       @id @default(cuid())
+  version       String       @unique
+  status        String       @default("DRAFT")
+  region        String
+  source        String
+  methodology   String?
+  effectiveFrom DateTime?
+  publishedAt   DateTime?
+  createdAt     DateTime     @default(now())
+  prices        Price[]
+  estimations   Estimation[]
+}
+
+model Estimation {
+  id                   String       @id @default(cuid())
+  calculatorId         String
+  calculatorSlug       String
+  answers              Json
+  result               Json
+  breakdown            Json
+  assumptions          Json
+  minAmount            Float
+  averageAmount        Float
+  maxAmount            Float
+  catalogId            String?
+  catalogVersion       String
+  catalogSource        String
+  algorithmVersion     String
+  recoveryTokenHash     String?      @unique
+  recoveryTokenExpiresAt DateTime?
+  consentGiven         Boolean      @default(false)
+  consentVersion       String?
+  consentAt            DateTime?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+  catalog              PriceCatalog? @relation(fields: [catalogId], references: [id], onDelete: SetNull)
+  leads                Lead[]
+
+  @@index([calculatorId, createdAt])
+  @@index([catalogVersion])
 }
 
 model Lead {
   id              String   @id @default(cuid())
+  estimationId    String?
   name            String
   email           String
   phone           String
@@ -35,7 +83,12 @@ model Lead {
   projectType     String
   estimatedBudget String
   status          String   @default("NUEVO")
+  consentGiven    Boolean  @default(false)
+  consentVersion  String?
+  consentAt       DateTime?
   createdAt       DateTime @default(now())
+  estimation      Estimation? @relation(fields: [estimationId], references: [id], onDelete: SetNull)
 
   @@index([createdAt])
+  @@index([estimationId])
 }

@@ -6,7 +6,6 @@ import type {
   CalculatorStep,
   EstimationResult,
 } from "@/calculators/types";
-import { calculate } from "@/calculators/engine";
 import { getCalculatorById } from "@/calculators/registry";
 import {
   trackCalculatorCompleted,
@@ -31,6 +30,9 @@ function parseNumber(value: AnswerValue | undefined): number | null {
 
 function stepIsValid(step: CalculatorStep, answers: Record<string, AnswerValue>): boolean {
   const value = answers[step.id];
+  if (step.optional && (value === undefined || value === null || value === "")) {
+    return true;
+  }
   if (step.fieldType === "single_choice") {
     return typeof value === "string" && value !== "";
   }
@@ -71,6 +73,11 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
   const [answers, setAnswers] = useState<Record<string, AnswerValue>>({});
   const [stepIndex, setStepIndex] = useState(0);
   const [estimate, setEstimate] = useState<EstimationResult | null>(null);
+  const [estimationId, setEstimationId] = useState<string | null>(null);
+  const [recoveryUrl, setRecoveryUrl] = useState<string | null>(null);
+  const [calculationError, setCalculationError] = useState<string | null>(null);
+  const [isCalculating, setIsCalculating] = useState(false);
+  const [elementsTouched, setElementsTouched] = useState(false);
   const hasSentStart = useRef(false);
 
   const step = steps[stepIndex];
@@ -89,10 +96,22 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
   const progress = ((stepIndex + 1) / steps.length) * 100;
 
   function setAnswer(value: AnswerValue) {
-    setAnswers((a) => ({ ...a, [step.id]: value }));
+    const getDefaultElements = calculator?.getDefaultElements;
+    setAnswers((a) => {
+      const next = { ...a, [step.id]: value };
+      if (
+        step.id === "scope" &&
+        !elementsTouched &&
+        getDefaultElements
+      ) {
+        next.elements = getDefaultElements(next);
+      }
+      return next;
+    });
   }
 
   function toggleElement(id: string) {
+    setElementsTouched(true);
     const current = Array.isArray(answers[step.id]) ? (answers[step.id] as string[]) : [];
     setAnswers((a) => ({
       ...a,
@@ -110,7 +129,7 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
     if (stepIndex > 0) setStepIndex(stepIndex - 1);
   }
 
-  function goNext() {
+  async function goNext() {
     if (stepIndex < steps.length - 1) {
       if (calculator && step) {
         trackCalculatorStepCompleted({
@@ -125,13 +144,36 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
       return;
     }
     if (!calculator) return;
+    setCalculationError(null);
+    setIsCalculating(true);
     try {
-      const result = calculate(calculator, answers);
-      setEstimate(result);
+      const response = await fetch("/api/estimations", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ calculatorId: calculator.id, answers }),
+      });
+      const payload = (await response.json()) as {
+        result?: EstimationResult;
+        id?: string;
+        recoveryUrl?: string;
+        error?: string;
+      };
+      if (!response.ok || !payload.result) {
+        throw new Error(payload.error ?? "No se pudo calcular la estimación.");
+      }
+      setEstimate(payload.result);
+      setEstimationId(payload.id ?? null);
+      setRecoveryUrl(payload.recoveryUrl ?? null);
       trackCalculatorCompleted(calculator.id);
       trackResultViewed(calculator.id);
-    } catch (err) {
-      console.error("[goreforma] No se pudo calcular la estimación", err);
+    } catch (error) {
+      setCalculationError(
+        error instanceof Error
+          ? error.message
+          : "No se pudo calcular la estimación. Inténtalo de nuevo.",
+      );
+    } finally {
+      setIsCalculating(false);
     }
   }
 
@@ -141,7 +183,11 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
     return (
       <div className="animate-step-in space-y-8">
         <div aria-live="polite">
-          <ResultView estimate={estimate} calculatorName={calculator.name} />
+          <ResultView
+            estimate={estimate}
+            calculatorName={calculator.name}
+            recoveryUrl={recoveryUrl ?? undefined}
+          />
         </div>
         <div className="text-center">
           <Button variant="ghost" onClick={goBack}>
@@ -162,7 +208,7 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
           <LeadForm
             calculatorId={calculator.id}
             calculatorName={calculator.name}
-            estimatedBudget={estimate.avg}
+            estimationId={estimationId ?? undefined}
           />
         </div>
       </div>
@@ -273,6 +319,7 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
                 min={step.min}
                 max={step.max}
                 placeholder={step.placeholder}
+                aria-required={!step.optional}
                 aria-label={step.question}
                 className="w-full rounded-2xl border border-slate-200 bg-white px-5 py-4 text-2xl font-bold text-slate-900 outline-none transition-colors placeholder:font-normal placeholder:text-slate-400 focus:border-accent-400"
               />
@@ -283,7 +330,8 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
               )}
             </div>
             <div className="mt-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-              {step.help && <span>{step.help}</span>}
+                {step.help && <span>{step.help}</span>}
+                {step.optional && <span className="text-xs text-slate-400">Opcional</span>}
               {step.min !== undefined && step.max !== undefined && (
                 <span className="text-xs text-slate-400">
                   Entre {step.min} y {step.max} {step.unit}
@@ -345,12 +393,21 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
           variant="primary"
           size="lg"
           onClick={goNext}
-          disabled={!currentValid}
+          disabled={!currentValid || isCalculating}
         >
-          {stepIndex === steps.length - 1 ? "Calcular mi estimación" : "Continuar"}
+          {isCalculating
+            ? "Calculando…"
+            : stepIndex === steps.length - 1
+              ? "Calcular mi estimación"
+              : "Continuar"}
           <IconArrowRight className="size-4" />
         </Button>
       </div>
+      {calculationError && (
+        <p className="mt-4 text-center text-sm text-red-600" role="alert">
+          {calculationError}
+        </p>
+      )}
     </div>
   );
 }

@@ -8,7 +8,7 @@ export interface PriceRange {
   max: number;
 }
 
-export type PriceSource = "PLACEHOLDER" | "TODO";
+export type PriceSource = "PLACEHOLDER" | "TODO" | "PROTOTYPE";
 
 // Estructura central de precios (espejo del modelo Prisma `Price`).
 export interface PriceEntry {
@@ -21,13 +21,13 @@ export interface PriceEntry {
   quality: Quality | "ALL";
   region: string;
   source: PriceSource;
-  updatedAt: string; // ISO 8601
+  updatedAt: string | null; // ISO 8601 cuando exista una fecha real
 }
 
 export interface PriceCatalog {
   name: string;
   region: string;
-  updatedAt: string;
+  updatedAt: string | null;
   entries: PriceEntry[];
 }
 
@@ -55,6 +55,7 @@ export interface CalculatorStep {
   max?: number;
   placeholder?: string;
   help?: string;
+  optional?: boolean;
 }
 
 export interface LinearQuantity {
@@ -84,7 +85,8 @@ export interface CalculatorDefinition {
   steps: CalculatorStep[];
   buildLineItems: (answers: Answers) => LinearQuantity[];
   buildAssumptions: (answers: Answers) => string[];
-  updatedAt: string; // fecha oficial de la estimación (los precios no cambian a diario)
+  getDefaultElements?: (answers: Answers) => string[];
+  updatedAt: string | null; // fecha oficial si existe una actualización real
 }
 
 export interface BreakdownItem extends PriceRange {
@@ -104,7 +106,9 @@ export interface EstimationResult {
   quality: Quality;
   breakdown: BreakdownItem[];
   assumptions: string[];
-  updatedAt: string;
+  updatedAt: string | null;
+  catalogVersion: string;
+  catalogSource: PriceSource;
   disclaimer: string;
 }
 
@@ -115,4 +119,4 @@ export const QUALITY_LABELS: Record<Quality, string> = {
 };
 
 export const DISCLAIMER_ESTIMACION =
-  "Estimación orientativa calculada con precios de referencia del mercado español. No es un presupuesto: el precio final depende del profesional, la zona y las características concretas de tu vivienda.";
+  "Estimación orientativa generada con datos provisionales del prototipo. No es un presupuesto ni debe utilizarse para tomar decisiones económicas.";

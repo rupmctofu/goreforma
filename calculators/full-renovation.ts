@@ -200,5 +200,9 @@ export const fullRenovationCalculator: CalculatorDefinition = {
       "No se incluyen muebles a medida, climatización ni imprevistos estructurales.",
     ];
   },
+  getDefaultElements(answers): string[] {
+    const scope = getScope(answers);
+    return SCOPE_DEFAULTS[scope] ?? SCOPE_DEFAULTS.completa;
+  },
   updatedAt: CATALOG_UPDATED_AT,
 };

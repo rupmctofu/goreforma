@@ -195,9 +195,13 @@ export const bathCalculator: CalculatorDefinition = {
     const area = getArea(answers);
     return [
       `Superficie de paredes a alicatar estimada en unos ${Math.round(area * BATH_AREAS_M2_CUT)} m² (baño de ${area} m²).`,
-      "Los precios de temperatura, plato de ducha y grifería incluyen instalación.",
+      "Los precios de sanitarios, plato de ducha y grifería incluyen instalación.",
       "No se incluyen desplazamientos ni problemas imprevistos (humedades, tuberías en mal estado).",
     ];
+  },
+  getDefaultElements(answers): string[] {
+    const scope = getScope(answers);
+    return SCOPE_DEFAULTS[scope] ?? SCOPE_DEFAULTS.completa;
   },
   updatedAt: CATALOG_UPDATED_AT,
 };

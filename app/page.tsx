@@ -17,6 +17,7 @@ import { buttonVariants, buttonVariantsInverted } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
 import { TrackedLink } from "@/components/analytics/track-link";
 import { JsonLd } from "@/components/seo/json-ld";
+import { BetaNotice } from "@/components/ui/beta-notice";
 
 function exampleResult(calculatorId: string) {
   const examples: Record<string, Record<string, string | number | string[]>> = {
@@ -60,24 +61,39 @@ const cardImages: Record<string, { src: string; alt: string }> = {
 
 const FAQ_ITEMS = [
   {
+    question: "¿Cuánto cuesta reformar un baño en 2026?",
+    answer:
+      "Depende del alcance y del nivel de acabado. Una reforma completa con calidad media suele moverse en un rango que puedes calcular en menos de 2 minutos con nuestra calculadora de baño.",
+  },
+  {
     question: "¿Las estimaciones son vinculantes?",
     answer:
-      "No. Los importes son orientativos y calculados con precios de referencia del mercado español. El coste final depende del profesional, la zona geográfica y las características concretas de tu vivienda. Pide siempre presupuesto detallado antes de empezar la obra.",
+      "No. En esta fase son cálculos provisionales para validar el prototipo y no deben utilizarse para tomar decisiones económicas.",
   },
   {
     question: "¿De dónde salen los precios?",
     answer:
-      "El catálogo de precios de GoReforma se publica con una fecha de actualización visible en cada resultado. Combina materiales y mano de obra típicos del sector para cada tipo de reforma.",
+      "Ahora mismo el catálogo contiene datos provisionales para validar el funcionamiento del prototipo. No representan precios de mercado ni deben utilizarse para tomar decisiones económicas.",
   },
   {
-    question: "¿Qué incluye el precio por m²?",
+    question: "¿Qué incluye la estimación?",
     answer:
-      "Cada partida muestra su unidad (por m², por metro lineal, por unidad o global). La estimación total suma todas las partidas y aplica el nivel de acabado (básica, media o premium) que elijas.",
+      "Un rango orientativo mínimo–media–máximo, el coste por m² y un desglose por partidas. Cada partida muestra su unidad (por m², por metro lineal, por unidad o global) y las hipótesis usadas.",
+  },
+  {
+    question: "¿Puedo usar la calculadora sin registrarme?",
+    answer:
+      "Sí. El cálculo es gratuito y sin registro. En el resultado puedes guardar un enlace temporal para volver a consultar esta estimación.",
   },
   {
     question: "¿Puedo ajustar el resultado?",
     answer:
-      "Sí. Tras ver tu estimación puedes volver atrás y cambiar metros, alcance, calidad o los elementos a incluir para afinar el rango al máximo.",
+      "Sí. Tras ver tu estimación vuelve atrás y cambia metros, alcance, calidad o los elementos incluidos para afinar el rango.",
+  },
+  {
+    question: "¿Qué diferencia hay entre estimación y presupuesto?",
+    answer:
+      "Una estimación es un rango orientativo calculado con precios de referencia. Un presupuesto es una oferta concreta de un profesional para tu vivienda, tras estudiar el caso real. GoReforma no envía presupuestos.",
   },
 ];
 
@@ -115,6 +131,9 @@ export default function Home() {
         <Container className="relative grid items-center gap-12 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:py-28">
           <div className="animate-fade-up">
             <Badge>Estimación gratuita y sin registro</Badge>
+            <div className="mt-4 max-w-xl">
+              <BetaNotice />
+            </div>
             <h1 className="mt-5 max-w-xl text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl">
               ¿Cuánto cuesta reformar tu <span className="text-accent-600">casa?</span>
             </h1>
@@ -219,8 +238,8 @@ export default function Home() {
               Elige qué quieres reformar
             </h2>
             <p className="mt-3 text-lg text-muted-foreground">
-              Cada una te guía paso a paso para calcular un presupuesto
-              orientativo ajustado.
+              Cada una te guía paso a paso para obtener una estimación
+              orientativa del alcance que elijas.
             </p>
           </div>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -334,8 +353,8 @@ export default function Home() {
             ))}
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
-            Rangos orientativos según el catálogo de precios de GoReforma, para
-            acabados de calidad media. El resultado final depende de cada caso.
+              Ejemplos generados con datos provisionales del prototipo. No son
+              precios de mercado ni presupuestos profesionales.
           </p>
         </Container>
       </section>
@@ -346,7 +365,7 @@ export default function Home() {
           <div>
             <Badge>Preguntas frecuentes</Badge>
             <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-              Dudas habituales sobre presupuestos
+              Dudas habituales sobre estimaciones
             </h2>
             <TrackedLink
               href={`/${calculators[0].slug}`}
@@ -370,11 +389,11 @@ export default function Home() {
               className="pointer-events-none absolute -left-20 -top-20 size-64 rounded-full bg-accent-500/40 blur-3xl"
             />
             <h2 className="relative text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Empieza a calcular tu presupuesto
+              Empieza a calcular tu estimación
             </h2>
             <p className="relative mx-auto mt-4 max-w-xl text-lg text-brand-100">
-              Sin pedir tus datos: solo responde unas preguntas y obtén el rango
-              orientativo de tu reforma.
+               Sin pedir tus datos: responde unas preguntas y obtén un rango
+               orientativo para entender la inversión de tu reforma.
             </p>
             <TrackedLink
               href={`/${calculators[0].slug}`}

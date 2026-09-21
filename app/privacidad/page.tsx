@@ -32,19 +32,19 @@ export default function PrivacidadPage() {
           <div>
             <h2 className="font-bold text-slate-900">Datos que recogemos</h2>
             <p className="mt-2">
-              Cuando solicitas presupuestos a través de las calculadoras,
-              recogemos los datos que nos facilitas de forma voluntaria: nombre,
-              email, teléfono, código postal y la estimación calculada. No se
-              recogen datos personales sin tu acción previa.
+               Cuando decides asociar tus datos a una estimación,
+               recogemos los datos que nos facilitas de forma voluntaria: nombre,
+               email, teléfono, código postal y el identificador de la estimación.
+               No se recogen datos personales para calcular sin tu acción previa.
             </p>
           </div>
           <div>
             <h2 className="font-bold text-slate-900">Finalidad y base legal</h2>
             <p className="mt-2">
-              Tus datos se utilizan exclusivamente para gestionar tu solicitud de
-              presupuestos, con base legal en tu consentimiento. No los
-              cedemos a terceros salvo obligación legal y no los utilizamos para
-              envíos comerciales no solicitados.
+               Tus datos se utilizan exclusivamente para asociarlos a la estimación
+               que has solicitado guardar, con base legal en tu consentimiento. No
+               enviamos presupuestos ni contactos profesionales automáticamente.
+               No los cedemos a terceros salvo obligación legal.
             </p>
           </div>
           <div>

@@ -12,6 +12,7 @@ import { Accordion } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/card";
 import { Container } from "@/components/ui/container";
 import { CalculatorIcon, IconCheck, IconArrowRight } from "@/components/icons";
+import { BetaNotice } from "@/components/ui/beta-notice";
 
 export const dynamicParams = false;
 
@@ -130,6 +131,9 @@ export default async function CalculatorPage({
           <p className="mt-4 max-w-2xl text-lg leading-8 text-muted-foreground">
             {calculator.shortDescription}
           </p>
+          <div className="mt-6 max-w-2xl">
+            <BetaNotice />
+          </div>
           {pageImages[calculator.id] && (
             <div className="mt-8 overflow-hidden rounded-3xl border border-slate-200/70 shadow-sm">
               <Image
