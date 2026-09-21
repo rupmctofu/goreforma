@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Catálogo central de precios. Valor de referencia vivo en `calculators/catalog.ts`;
+// esta tabla permite sincronizar y versionar los precios desde la base de datos.
+// Todos los valores actuales son PLACEHOLDER/TODO (no son datos reales de mercado).
+model Price {
+  id           String   @id @default(cuid())
+  category     String
+  subcategory  String
+  unit         String
+  minPrice     Float
+  averagePrice Float
+  maxPrice     Float
+  quality      String // BASICA | MEDIA | PREMIUM | ALL
+  region       String? // ejemplo: "nacional"
+  source       String // PLACEHOLDER | TODO
+  updatedAt    DateTime @default(now()) @updatedAt
+
+  @@index([category, subcategory, quality])
+}
+
+model Lead {
+  id              String   @id @default(cuid())
+  name            String
+  email           String
+  phone           String
+  postalCode      String?
+  projectType     String
+  estimatedBudget String
+  status          String   @default("NUEVO")
+  createdAt       DateTime @default(now())
+
+  @@index([createdAt])
+}
