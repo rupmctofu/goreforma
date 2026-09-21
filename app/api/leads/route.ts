@@ -33,7 +33,7 @@ export async function POST(request: Request) {
   try {
     const lead = await prisma.lead.create({
       data: {
-        name: input.name.trim(),
+        name: input.name.trim() || "Sin nombre",
         email: input.email.trim().toLowerCase(),
         phone: input.phone.trim(),
         postalCode: input.postalCode.trim() || null,

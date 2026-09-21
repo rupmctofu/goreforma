@@ -32,12 +32,12 @@ export function validateLead(input: LeadInput): ValidationResult {
   const errors: ValidationResult["errors"] = {};
 
   const name = input.name.trim();
-  if (name.length < 2) errors.name = "Escribe tu nombre.";
+  if (name !== "" && name.length < 2) errors.name = "Escribe tu nombre.";
 
   if (!isEmail(input.email)) errors.email = "Introduce un email válido.";
 
-  if (!isPhone(input.phone))
-    errors.phone = "Introduce un teléfono válido.";
+  const phone = input.phone.trim();
+  if (phone !== "" && !isPhone(phone)) errors.phone = "Introduce un teléfono válido.";
 
   const postalCode = input.postalCode?.trim() ?? "";
   if (postalCode !== "" && !isPostalCode(postalCode))

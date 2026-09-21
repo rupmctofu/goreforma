@@ -13,9 +13,9 @@ interface LeadFormProps {
 
 type Errors = Partial<Record<"name" | "email" | "phone" | "postalCode", string>>;
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 const PHONE_RE = /^[+()\d\s.-]{9,15}$/;
 const POSTAL_RE = /^\d{5}$/;
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export function LeadForm({ calculatorId, calculatorName, estimatedBudget }: LeadFormProps) {
   const [form, setForm] = useState({
@@ -40,9 +40,11 @@ export function LeadForm({ calculatorId, calculatorName, estimatedBudget }: Lead
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     const next: Errors = {};
-    if (form.name.trim().length < 2) next.name = "Escribe tu nombre.";
+    if (form.name.trim() !== "" && form.name.trim().length < 2)
+      next.name = "Escribe tu nombre.";
     if (!EMAIL_RE.test(form.email.trim())) next.email = "Introduce un email válido.";
-    if (!PHONE_RE.test(form.phone.trim())) next.phone = "Introduce un teléfono válido.";
+    if (form.phone.trim() !== "" && !PHONE_RE.test(form.phone.trim()))
+      next.phone = "Introduce un teléfono válido.";
     if (form.postalCode.trim() !== "" && !POSTAL_RE.test(form.postalCode.trim()))
       next.postalCode = "Debe tener 5 dígitos.";
 
@@ -77,10 +79,10 @@ export function LeadForm({ calculatorId, calculatorName, estimatedBudget }: Lead
         <span className="mx-auto flex size-12 items-center justify-center rounded-full bg-accent-600 text-white">
           <IconCheck className="size-6" />
         </span>
-        <p className="mt-4 text-lg font-bold text-slate-900">¡Solicitud enviada!</p>
+        <p className="mt-4 text-lg font-bold text-slate-900">Estimación guardada</p>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Hemos guardado tu estimación de <strong>{calculatorName}</strong>. Te contactaremos
-          cuando tengamos profesionales disponibles en tu zona.
+          Hemos guardado la estimación de <strong>{calculatorName}</strong> ({estimatedBudget !== undefined ? `${Math.round(estimatedBudget).toLocaleString("es-ES")} € (media)` : "rango orientativo"}).
+          Te avisaremos cuando haya profesionales disponibles para tu tipo de reforma.
         </p>
       </div>
     );
@@ -88,21 +90,33 @@ export function LeadForm({ calculatorId, calculatorName, estimatedBudget }: Lead
 
   return (
     <form onSubmit={onSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8" noValidate>
-      <div className="flex items-center justify-between gap-4">
-        <div>
-          <h3 className="text-lg font-bold text-slate-900">Consigue presupuestos reales</h3>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Déjanos tus datos para que te lleguen presupuestos de profesionales.
-          </p>
-        </div>
-        <span className="hidden shrink-0 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-700 sm:inline-flex">
-          Estimación: {estimatedBudget ? `${Math.round(estimatedBudget).toLocaleString("es-ES")} €` : "—"}
-        </span>
+      <div>
+        <h3 className="text-lg font-bold text-slate-900">Guarda tu estimación</h3>
+        <p className="mt-1 text-sm leading-6 text-muted-foreground">
+          Es opcional: tu rango ya está en pantalla. Déjanos tu email y te lo
+          guardamos para que lo recuperes cuando quieras.
+        </p>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
+      <label className="mt-6 block text-sm font-medium text-slate-800">
+        Email <span className="font-normal text-muted-foreground">(obligatorio)</span>
+        <input
+          type="email"
+          name="email"
+          autoComplete="email"
+          required
+          value={form.email}
+          onChange={(e) => set("email", e.target.value)}
+          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-accent-400"
+          placeholder="maria@ejemplo.com"
+          aria-invalid={Boolean(errors.email)}
+        />
+        {errors.email && <span className="mt-1 block text-xs text-red-600">{errors.email}</span>}
+      </label>
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="block text-sm font-medium text-slate-800">
-          Nombre
+          Nombre <span className="font-normal text-muted-foreground">(opcional)</span>
           <input
             type="text"
             name="name"
@@ -117,22 +131,7 @@ export function LeadForm({ calculatorId, calculatorName, estimatedBudget }: Lead
         </label>
 
         <label className="block text-sm font-medium text-slate-800">
-          Email
-          <input
-            type="email"
-            name="email"
-            autoComplete="email"
-            value={form.email}
-            onChange={(e) => set("email", e.target.value)}
-            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-accent-400"
-            placeholder="maria@ejemplo.com"
-            aria-invalid={Boolean(errors.email)}
-          />
-          {errors.email && <span className="mt-1 block text-xs text-red-600">{errors.email}</span>}
-        </label>
-
-        <label className="block text-sm font-medium text-slate-800">
-          Teléfono
+          Teléfono <span className="font-normal text-muted-foreground">(opcional)</span>
           <input
             type="tel"
             name="phone"
@@ -145,29 +144,29 @@ export function LeadForm({ calculatorId, calculatorName, estimatedBudget }: Lead
           />
           {errors.phone && <span className="mt-1 block text-xs text-red-600">{errors.phone}</span>}
         </label>
-
-        <label className="block text-sm font-medium text-slate-800">
-          Código postal <span className="font-normal text-muted-foreground">(opcional)</span>
-          <input
-            type="text"
-            name="postalCode"
-            autoComplete="postal-code"
-            inputMode="numeric"
-            maxLength={5}
-            value={form.postalCode}
-            onChange={(e) => set("postalCode", e.target.value.replace(/\D/g, ""))}
-            className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-accent-400"
-            placeholder="28001"
-            aria-invalid={Boolean(errors.postalCode)}
-          />
-          {errors.postalCode && (
-            <span className="mt-1 block text-xs text-red-600">{errors.postalCode}</span>
-          )}
-        </label>
       </div>
 
+      <label className="mt-4 block text-sm font-medium text-slate-800">
+        Código postal <span className="font-normal text-muted-foreground">(opcional)</span>
+        <input
+          type="text"
+          name="postalCode"
+          autoComplete="postal-code"
+          inputMode="numeric"
+          maxLength={5}
+          value={form.postalCode}
+          onChange={(e) => set("postalCode", e.target.value.replace(/\D/g, ""))}
+          className="mt-1.5 w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-900 outline-none transition-colors placeholder:text-slate-400 focus:border-accent-400"
+          placeholder="28001"
+          aria-invalid={Boolean(errors.postalCode)}
+        />
+        {errors.postalCode && (
+          <span className="mt-1 block text-xs text-red-600">{errors.postalCode}</span>
+        )}
+      </label>
+
       <Button type="submit" size="lg" className="mt-6 w-full" disabled={status === "submitting"}>
-        {status === "submitting" ? "Enviando…" : "Solicitar presupuestos"}
+        {status === "submitting" ? "Guardando…" : "Guardar mi estimación"}
       </Button>
 
       <p className="mt-3 text-center text-xs text-muted-foreground">
@@ -176,7 +175,7 @@ export function LeadForm({ calculatorId, calculatorName, estimatedBudget }: Lead
 
       {status === "error" && (
         <p className="mt-3 text-center text-sm text-red-600">
-          No se pudo enviar la solicitud. Inténtalo de nuevo en un momento.
+          No se pudo guardar la estimación. Inténtalo de nuevo en un momento.
         </p>
       )}
     </form>

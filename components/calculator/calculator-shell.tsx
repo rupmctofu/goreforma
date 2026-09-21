@@ -44,6 +44,27 @@ function stepIsValid(step: CalculatorStep, answers: Record<string, AnswerValue>)
   return true;
 }
 
+function answerSummary(
+  step: CalculatorStep,
+  answers: Record<string, AnswerValue>,
+): string | null {
+  const value = answers[step.id];
+  if (value === undefined || value === null || value === "") return null;
+  if (step.fieldType === "number") {
+    return `${value}${step.unit ? ` ${step.unit}` : ""}`;
+  }
+  if (step.fieldType === "single_choice") {
+    return step.options?.find((o) => o.id === value)?.label ?? String(value);
+  }
+  if (step.fieldType === "multi_choice") {
+    const selected = Array.isArray(value) ? value : [];
+    return selected.length > 0
+      ? `${selected.length} ${selected.length === 1 ? "elemento" : "elementos"}`
+      : null;
+  }
+  return null;
+}
+
 export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
   const calculator = useMemo(() => getCalculatorById(calculatorId), [calculatorId]);
   const steps = calculator?.steps ?? [];
@@ -119,7 +140,9 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
   if (estimate) {
     return (
       <div className="animate-step-in space-y-8">
-        <ResultView estimate={estimate} calculatorName={calculator.name} />
+        <div aria-live="polite">
+          <ResultView estimate={estimate} calculatorName={calculator.name} />
+        </div>
         <div className="text-center">
           <Button variant="ghost" onClick={goBack}>
             <IconArrowLeft className="size-4" />
@@ -127,13 +150,13 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
           </Button>
         </div>
 
-        <div id="presupuestos" className="scroll-mt-24">
+        <div id="guardar-estimacion" className="scroll-mt-24">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-extrabold tracking-tight text-slate-900">
-              Consigue presupuestos reales
+              Guarda tu estimación
             </h2>
             <span className="hidden text-sm text-muted-foreground sm:block">
-              Rellena el formulario y te contactaremos
+              Opcional · solo con email
             </span>
           </div>
           <LeadForm
@@ -151,7 +174,7 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
       {/* Progreso */}
       <div className="mb-8">
         <div className="flex items-center justify-between text-sm">
-          <span className="font-semibold text-slate-900">
+          <span className="font-semibold text-slate-900" aria-live="polite">
             Paso {stepIndex + 1} de {steps.length}
           </span>
           <span className="text-muted-foreground">{step.title}</span>
@@ -169,8 +192,31 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
         </div>
       </div>
 
+      {steps.slice(0, stepIndex).some((s) => answerSummary(s, answers)) && (
+        <ul className="mb-6 flex flex-wrap gap-2" aria-label="Pasos respondidos">
+          {steps.slice(0, stepIndex).map((s, idx) => {
+            const summary = answerSummary(s, answers);
+            if (!summary) return null;
+            return (
+              <li key={s.id}>
+                <button
+                  type="button"
+                  onClick={() => setStepIndex(idx)}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:border-accent-200 hover:bg-accent-50 hover:text-accent-700"
+                >
+                  {s.title}: {summary}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+
       {/* Pregunta */}
-      <h2 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+      <h2
+        aria-live="polite"
+        className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl"
+      >
         {step.question}
       </h2>
 

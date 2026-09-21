@@ -1,5 +1,5 @@
 import type { EstimationResult } from "@/calculators/types";
-import { formatEUR, formatNumber } from "@/lib/format";
+import { formatEUR, formatNumber, roundToStep } from "@/lib/format";
 import { QUALITY_LABELS } from "@/calculators/types";
 
 const UNIT_LABELS: Record<string, string> = {
@@ -17,6 +17,57 @@ function StepBadge({ children }: { children: React.ReactNode }) {
   );
 }
 
+function RangeBar({ estimate }: { estimate: EstimationResult }) {
+  const pad = Math.max((estimate.max - estimate.min) * 0.1, estimate.avg * 0.02);
+  const lo = Math.max(0, estimate.min - pad);
+  const hi = estimate.max + pad;
+  const range = hi - lo || 1;
+  const pct = (v: number) => ((v - lo) / range) * 100;
+
+  const minP = pct(estimate.min);
+  const maxP = pct(estimate.max);
+  const avgP = pct(estimate.avg);
+
+  return (
+    <div className="mx-auto mt-7 max-w-md" aria-hidden="true">
+      <div className="relative h-1.5 rounded-full bg-slate-200/70">
+        <div
+          className="absolute top-0 h-full rounded-full bg-accent-300"
+          style={{ left: `${minP}%`, width: `${Math.max(0, maxP - minP)}%` }}
+        />
+      </div>
+      <div className="relative mt-2 h-4">
+        <span
+          className="absolute top-0 size-2.5 -translate-x-1/2 rounded-full border-2 border-accent-300 bg-white"
+          style={{ left: `${minP}%` }}
+        />
+        <span
+          className="absolute top-0 size-3.5 -translate-x-1/2 rounded-full border-2 border-white bg-accent-600 shadow"
+          style={{ left: `${avgP}%` }}
+        />
+        <span
+          className="absolute top-0 size-2.5 -translate-x-1/2 rounded-full border-2 border-accent-300 bg-white"
+          style={{ left: `${maxP}%` }}
+        />
+      </div>
+      <div className="relative mt-2 h-4 text-[11px] font-medium text-slate-500">
+        <span className="absolute -translate-x-1/2" style={{ left: `${minP}%` }}>
+          mín
+        </span>
+        <span
+          className="absolute -translate-x-1/2 font-bold text-accent-700"
+          style={{ left: `${avgP}%` }}
+        >
+          media
+        </span>
+        <span className="absolute -translate-x-1/2" style={{ left: `${maxP}%` }}>
+          máx
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function ResultView({
   estimate,
   calculatorName,
@@ -28,24 +79,29 @@ export function ResultView({
     <div className="animate-step-in space-y-6">
       <div className="rounded-[2rem] border border-accent-100 bg-gradient-to-br from-accent-50 to-white p-8 text-center sm:p-10">
         <StepBadge>
-          {calculatorName} · {QUALITY_LABELS[estimate.quality]}
+          {calculatorName} · Calidad {QUALITY_LABELS[estimate.quality].toLowerCase()}
         </StepBadge>
 
-        <div className="mt-6 flex items-baseline justify-center gap-3">
+        <div className="mt-6 flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
           <span className="text-4xl font-extrabold tracking-tight text-slate-900 sm:text-5xl">
-            {formatEUR(estimate.min)}
+            {formatEUR(roundToStep(estimate.min))}
           </span>
           <span className="text-xl font-semibold text-slate-400">–</span>
           <span className="text-4xl font-extrabold tracking-tight text-accent-600 sm:text-5xl">
-            {formatEUR(estimate.max)}
+            {formatEUR(roundToStep(estimate.max))}
           </span>
         </div>
 
-        <p className="mt-3 text-sm text-muted-foreground">
+        <p className="mt-2 text-sm text-muted-foreground">
           Rango orientativo · estimación media{" "}
-          <span className="font-semibold text-slate-800">{formatEUR(estimate.avg)}</span> ·{" "}
-          {formatEUR(estimate.perM2.min)} – {formatEUR(estimate.perM2.max)} por m²
+          <span className="font-semibold text-slate-800">
+            {formatEUR(roundToStep(estimate.avg))}
+          </span>{" "}
+          · {formatEUR(roundToStep(estimate.perM2.min))} –{" "}
+          {formatEUR(roundToStep(estimate.perM2.max))} por m²
         </p>
+
+        <RangeBar estimate={estimate} />
 
         <div className="mx-auto mt-6 flex max-w-md flex-wrap items-center justify-center gap-2 text-xs">
           <StepBadge>{formatNumber(estimate.area)} m²</StepBadge>
@@ -77,7 +133,7 @@ export function ResultView({
                     {formatNumber(item.quantity)}
                   </td>
                   <td className="py-3 text-right font-medium text-slate-900">
-                    {formatEUR(item.min)} – {formatEUR(item.max)}
+                    {formatEUR(roundToStep(item.min))} – {formatEUR(roundToStep(item.max))}
                   </td>
                 </tr>
               ))}
