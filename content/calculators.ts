@@ -1,6 +1,7 @@
 export interface CalculatorContent {
   metaTitle: string;
   metaDescription: string;
+  heading: string;
   intro: string;
   highlights: string[];
   faqs: { question: string; answer: string }[];
@@ -11,10 +12,11 @@ export const CALCULATOR_CONTENT: Record<string, CalculatorContent> = {
     metaTitle: "Calculadora de reforma de baño: precio orientativo",
     metaDescription:
       "Explora una estimación provisional del coste de reformar un baño según metros, calidad y elementos. Resultado orientativo por partidas.",
+    heading: "Cuánto cuesta reformar un baño",
     intro:
-      "Reformar un baño es una de las obras más habituales y también una de las que más varía de precio según el estado de las instalaciones y los acabados elegidos. En esta calculadora puedes partir del alcance que quieres (reforma completa, suelo y azulejos, sanitarios o mueble) e ir ajustando los metros y los elementos a cambiar para obtener un rango orientativo por partidas.",
+      "Un baño es la reforma más frecuente y también la que peor se intuye: los mismos metros pueden costar el doble según lo que haya que tirar. Dinos el alcance, los metros y la calidad, y te damos el rango partida a partida para que sepas qué preguntar cuando pidas presupuesto.",
     highlights: [
-      "Incluye alicatado, suelo, sanitarios, ducha, mueble y grifería como partidas separadas.",
+      "Alicatado, suelo, sanitarios, ducha, mueble y grifería, cada uno como partida separada con su precio.",
       "Estima la superficie de pared a alicatar a partir de los metros del baño.",
       "Diferencia entre acabado básico, medio y premium para el mismo proyecto.",
     ],
@@ -22,7 +24,7 @@ export const CALCULATOR_CONTENT: Record<string, CalculatorContent> = {
       {
         question: "¿Cuánto cuesta reformar un baño de 5 m²?",
         answer:
-          "Depende del alcance y la calidad. Una reforma completa de 5 m² con acabados medios suele moverse en un rango amplio que verás calculado al terminar el formulario. Cambiar solo el mueble o los sanitarios reduce mucho el importe frente a una reforma integral.",
+          "Depende del alcance y la calidad. Al terminar el formulario verás el rango calculado para tus metros y tu acabado. Como referencia, cambiar solo el mueble o los sanitarios reduce mucho el importe frente a una reforma completa.",
       },
       {
         question: "¿Qué partidas encarecen más la reforma de un baño?",
@@ -40,8 +42,9 @@ export const CALCULATOR_CONTENT: Record<string, CalculatorContent> = {
     metaTitle: "Calculadora de reforma de cocina: precio orientativo",
     metaDescription:
       "Explora una estimación provisional del coste de reformar una cocina según metros, muebles, encimera y electrodomésticos.",
+    heading: "Cuánto cuesta reformar una cocina",
     intro:
-      "La cocina concentra muchas partidas distintas: muebles, encimera, electrodomésticos, fontanería, electricidad y revestimientos. Esta calculadora te permite elegir entre una cocina completa o cambios parciales (solo muebles, solo electrodomésticos o solo encimera) y ajustar la superficie para estimar los metros lineales de mobiliario.",
+      "La cocina es donde más se nota la diferencia entre un tipo de cambio y otro: muebles, encimera y electrodomésticos tienen precios muy distintos, y cambiarlo todo no cuesta lo mismo que cambiar una sola cosa. Elige el alcance y te lo desglosamos partida a partida.",
     highlights: [
       "Separa muebles, encimera, electrodomésticos, fregadero y salpicadero.",
       "Estima los metros lineales de mueble a partir de la superficie de la cocina.",
@@ -51,7 +54,7 @@ export const CALCULATOR_CONTENT: Record<string, CalculatorContent> = {
       {
         question: "¿Cuánto cuesta una cocina completa de 10 m²?",
         answer:
-          "El rango depende sobre todo de la calidad de los muebles y los electrodomésticos. Al completar el formulario verás el rango orientativo para los metros y el acabado que elijas, con el desglose de cada partida.",
+          "El rango depende sobre todo de la calidad de los muebles y los electrodomésticos. Al completar el formulario verás el rango para los metros y el acabado que elijas, con el desglose de cada partida.",
       },
       {
         question: "¿Merece la pena cambiar solo la encimera?",
@@ -69,8 +72,9 @@ export const CALCULATOR_CONTENT: Record<string, CalculatorContent> = {
     metaTitle: "Calculadora de reforma integral: precio por m²",
     metaDescription:
       "Explora una estimación provisional de reforma integral según metros construidos y acabados, con desglose por partidas.",
+    heading: "Cuánto cuesta una reforma integral",
     intro:
-      "Una reforma integral toca toda la vivienda: derribos, instalaciones, suelos, pintura, carpintería y, con frecuencia, cocina y baños. Aquí puedes calcular el coste completo o limitarlo a acabados o a instalaciones, indicando los metros construidos para estimar el número de puertas, baños y superficies de trabajo.",
+      "Una reforma integral toca toda la vivienda y es donde el orden de magnitud más cambia de una casa a otra. Indica los metros construidos y la calidad, y te damos el coste por m² y el total partida a partida. Puedes calcular la reforma entera o solo una fase: acabados o instalaciones.",
     highlights: [
       "Calcula instalación eléctrica y fontanería por m² de vivienda.",
       "Estima suelos, pintura de paredes y techos y puertas interiores.",
@@ -80,7 +84,7 @@ export const CALCULATOR_CONTENT: Record<string, CalculatorContent> = {
       {
         question: "¿Cuánto cuesta una reforma integral de un piso de 80 m²?",
         answer:
-          "El precio por m² varía según acabados y el estado de las instalaciones. Al terminar el formulario verás el rango total y el coste por m² para tu superficie y calidad elegidas.",
+          "El precio por m² varía según los acabados y el estado de las instalaciones. Al terminar el formulario verás el rango total y el coste por m² para la superficie y la calidad que elijas.",
       },
       {
         question: "¿Se pueden hacer reformas integrales por fases?",
@@ -98,8 +102,9 @@ export const CALCULATOR_CONTENT: Record<string, CalculatorContent> = {
     metaTitle: "Calculadora para pintar un piso: precio por m²",
     metaDescription:
       "Explora una estimación provisional para pintar una vivienda según superficie, acabado y trabajos de preparación.",
+    heading: "Cuánto cuesta pintar un piso",
     intro:
-      "Pintar es la reforma más rápida y económica, pero el precio cambia mucho según la superficie, el estado de las paredes y si se pintan también los techos. Esta calculadora parte de los metros totales a pintar y permite añadir reparación de grietas, imprimación selladora o pintura específica para zonas húmedas.",
+      "Pintar es la reforma más rápida y económica, y la que más sorprende cuando el precio no cuadra con lo que te dijeron por teléfono. Señala qué pintas, cuántos metros son y si hay que preparar la superficie antes. El resultado sale por m², con material y mano de obra.",
     highlights: [
       "Diferencia entre pintar paredes, techos o toda la vivienda.",
       "Añade preparación de superficie, imprimación o pintura antihumedad.",
@@ -109,7 +114,7 @@ export const CALCULATOR_CONTENT: Record<string, CalculatorContent> = {
       {
         question: "¿Cuánto cuesta pintar un piso de 90 m²?",
         answer:
-          "El importe depende de si pintas solo paredes o también techos y del estado de la superficie. Introduce los metros totales a pintar para obtener el rango orientativo con el acabado que elijas.",
+          "El importe depende de si pintas solo paredes o también techos y del estado de la superficie. Introduce los metros totales a pintar para obtener el rango con la calidad que elijas.",
       },
       {
         question: "¿Hace falta imprimación siempre?",

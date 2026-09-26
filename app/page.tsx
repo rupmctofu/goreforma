@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import { calculate } from "@/calculators/engine";
 import { calculators } from "@/calculators/registry";
 import { formatEUR } from "@/lib/format";
@@ -15,7 +16,6 @@ import { Accordion } from "@/components/ui/accordion";
 import { Badge, Card } from "@/components/ui/card";
 import { buttonVariants, buttonVariantsInverted } from "@/components/ui/button";
 import { Container } from "@/components/ui/container";
-import { TrackedLink } from "@/components/analytics/track-link";
 import { JsonLd } from "@/components/seo/json-ld";
 import { BetaNotice } from "@/components/ui/beta-notice";
 
@@ -43,47 +43,31 @@ function exampleResult(calculatorId: string) {
   }
 }
 
-const cardImages: Record<string, { src: string; alt: string }> = {
-  bath: { src: "/images/bano.jpg", alt: "Baño reformado con azulejos blancos y lavabo moderno" },
-  kitchen: {
-    src: "/images/cocina.jpg",
-    alt: "Cocina moderna reformada con armarios blancos y encimera de mármol",
-  },
-  integral: {
-    src: "/images/integral.jpg",
-    alt: "Salón reformado con sofá gris junto a gran ventanal",
-  },
-  painting: {
-    src: "/images/pintura.jpg",
-    alt: "Pintor aplicando pintura a una pared con rodillo durante una reforma",
-  },
-};
-
 const FAQ_ITEMS = [
   {
-    question: "¿Cuánto cuesta reformar un baño en 2026?",
+    question: "¿La estimación coincide con el presupuesto final?",
     answer:
-      "Depende del alcance y del nivel de acabado. Una reforma completa con calidad media suele moverse en un rango que puedes calcular en menos de 2 minutos con nuestra calculadora de baño.",
-  },
-  {
-    question: "¿Las estimaciones son vinculantes?",
-    answer:
-      "No. En esta fase son cálculos provisionales para validar el prototipo y no deben utilizarse para tomar decisiones económicas.",
+      "No necesariamente. El precio final depende de las características concretas de la vivienda, su estado, el acceso, los materiales elegidos y las condiciones de cada profesional. GoReforma sirve como referencia inicial para entender el orden de magnitud y qué partidas intervienen.",
   },
   {
     question: "¿De dónde salen los precios?",
     answer:
-      "Ahora mismo el catálogo contiene datos provisionales para validar el funcionamiento del prototipo. No representan precios de mercado ni deben utilizarse para tomar decisiones económicas.",
+      "Estamos construyendo un catálogo de precios de referencia del mercado español, organizado por partida, unidad y nivel de calidad. Cada estimación muestra el catálogo con el que se ha calculado y las hipótesis aplicadas, para que sepas exactamente cómo se ha obtenido el rango. El catálogo todavía se está afinando.",
+  },
+  {
+    question: "¿Qué diferencia hay entre estimación y presupuesto?",
+    answer:
+      "Una estimación es un rango orientativo calculado con precios de referencia. Un presupuesto es una oferta concreta de un profesional para tu vivienda, tras estudiar el caso real. GoReforma no emite presupuestos ni pone a nadie en contacto contigo.",
+  },
+  {
+    question: "¿Necesito registrarme o dejar mis datos?",
+    answer:
+      "No. Puedes ver el resultado completo sin dar ningún dato. El email es solo si quieres guardar la estimación y volver a consultarla después; es opcional.",
   },
   {
     question: "¿Qué incluye la estimación?",
     answer:
-      "Un rango orientativo mínimo–media–máximo, el coste por m² y un desglose por partidas. Cada partida muestra su unidad (por m², por metro lineal, por unidad o global) y las hipótesis usadas.",
-  },
-  {
-    question: "¿Puedo usar la calculadora sin registrarme?",
-    answer:
-      "Sí. El cálculo es gratuito y sin registro. En el resultado puedes guardar un enlace temporal para volver a consultar esta estimación.",
+      "Un rango mínimo, medio y máximo, el coste por m² y un desglose por partidas. Cada partida muestra su unidad (por m², por metro lineal, por unidad o global) y las hipótesis usadas.",
   },
   {
     question: "¿Puedo ajustar el resultado?",
@@ -91,9 +75,9 @@ const FAQ_ITEMS = [
       "Sí. Tras ver tu estimación vuelve atrás y cambia metros, alcance, calidad o los elementos incluidos para afinar el rango.",
   },
   {
-    question: "¿Qué diferencia hay entre estimación y presupuesto?",
+    question: "¿Las estimaciones son vinculantes?",
     answer:
-      "Una estimación es un rango orientativo calculado con precios de referencia. Un presupuesto es una oferta concreta de un profesional para tu vivienda, tras estudiar el caso real. GoReforma no envía presupuestos.",
+      "No. No constituyen un presupuesto ni un contrato, y no deben utilizarse como precio final de la obra.",
   },
 ];
 
@@ -130,42 +114,46 @@ export default function Home() {
         />
         <Container className="relative grid items-center gap-12 py-20 lg:grid-cols-[1.1fr_0.9fr] lg:py-28">
           <div className="animate-fade-up">
-            <Badge>Estimación gratuita y sin registro</Badge>
-            <div className="mt-4 max-w-xl">
-              <BetaNotice />
-            </div>
-            <h1 className="mt-5 max-w-xl text-4xl font-extrabold leading-[1.1] tracking-tight text-slate-900 sm:text-5xl">
-              ¿Cuánto cuesta reformar tu <span className="text-accent-600">casa?</span>
+            <Badge>Gratis · Sin registro · 2 minutos</Badge>
+            <h1 className="mt-5 max-w-2xl text-4xl font-extrabold leading-[1.05] tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+              Entiende cuánto puede costar tu reforma{" "}
+              <span className="text-accent-600">antes de pedir presupuestos</span>
             </h1>
-            <p className="mt-5 max-w-lg text-lg leading-8 text-muted-foreground">
-              Descubre en menos de 2 minutos cuánto puede costar la reforma de tu casa:
-              baño, cocina, reforma integral o pintura. Compara niveles de calidad y
-              hazte una idea clara antes de pedir presupuestos.
+            <p className="mt-6 max-w-xl text-lg leading-8 text-muted-foreground">
+              Elige qué vas a reformar, responde unas preguntas y obtén un rango de
+              precio con el desglose de cada partida: qué se paga, cuánto y por qué.
+              Sin registro y sin esperas.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
-              <TrackedLink
+              <Link
                 href={`/${calculators[0].slug}`}
-                calculator={calculators[0].id}
                 className={buttonVariants({ variant: "primary", size: "lg" })}
               >
-                Calcular el coste de mi reforma
+                Calcular mi reforma gratis
                 <IconArrowRight className="size-4" />
-              </TrackedLink>
+              </Link>
               <a
                 href="#calculadoras"
                 className={buttonVariants({ variant: "secondary", size: "lg" })}
               >
-                Ver calculadoras
+                Ver las 4 calculadoras
               </a>
             </div>
             <ul className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
-              {["Resultado en menos de 2 minutos", "3 niveles de calidad", "Desglose por partidas"].map((item) => (
+              {[
+                "Un rango, no un precio cerrado",
+                "Cada partida con su cantidad y su precio",
+                "Acabado básico, medio o premium",
+              ].map((item) => (
                 <li key={item} className="flex items-center gap-2">
                   <IconCheck className="size-4 text-accent-600" />
                   {item}
                 </li>
               ))}
             </ul>
+            <div className="mt-8 max-w-xl">
+              <BetaNotice />
+            </div>
           </div>
 
           <div className="relative hidden lg:block">
@@ -201,18 +189,18 @@ export default function Home() {
             {[
               {
                 icon: IconClock,
-                title: "Resultado en menos de 2 minutos",
-                text: "Responde unas preguntas sobre tu reforma y obtén un rango orientativo al instante.",
-              },
-              {
-                icon: IconLock,
-                title: "Sin registro ni formularios",
-                text: "No te pedimos email ni datos para calcular. Guardar la estimación es opcional y siempre después del resultado.",
+                title: "Dos minutos, no una tarde",
+                text: "Responde unas preguntas y tienes el rango. No hace falta llamar a nadie ni esperar a nadie.",
               },
               {
                 icon: IconList,
-                title: "Desglose transparente por partidas",
-                text: "Cada concepto muestra su unidad y sus hipótesis de cálculo, con la fecha de actualización del catálogo.",
+                title: "Entender de qué depende el precio",
+                text: "El coste cambia según el estado de la vivienda, el acceso y los acabados. Por eso te mostramos las partidas, no solo un total.",
+              },
+              {
+                icon: IconLock,
+                title: "Guarda el enlace y vuelve cuando quieras",
+                text: "El cálculo se queda en el enlace de esta estimación. Decide con calma, sin volver a empezar.",
               },
             ].map(({ icon: Icon, title, text }) => (
               <div key={title} className="flex items-start gap-4">
@@ -233,27 +221,25 @@ export default function Home() {
       <section id="calculadoras" className="scroll-mt-20 py-20">
         <Container>
           <div className="max-w-2xl">
-            <Badge>Calculadoras</Badge>
+            <Badge>Elige tu reforma</Badge>
             <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-              Elige qué quieres reformar
+              ¿Qué vas a reformar?
             </h2>
             <p className="mt-3 text-lg text-muted-foreground">
-              Cada una te guía paso a paso para obtener una estimación
-              orientativa del alcance que elijas.
+              Cuatro cálculos distintos, con el mismo nivel de detalle en el desglose.
             </p>
           </div>
           <div className="mt-10 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {examples.map(({ calculator, data }) => (
-              <TrackedLink
+              <Link
                 key={calculator.id}
                 href={`/${calculator.slug}`}
-                calculator={calculator.id}
                 className="group flex flex-col overflow-hidden rounded-3xl border border-slate-200/80 bg-surface shadow-sm transition-all duration-200 hover:-translate-y-1 hover:border-accent-200 hover:shadow-lg hover:shadow-accent-900/5"
               >
                 <div className="relative overflow-hidden">
                   <Image
-                    src={cardImages[calculator.id].src}
-                    alt={cardImages[calculator.id].alt}
+                    src={calculator.image.src}
+                    alt={calculator.image.alt}
                     width={1000}
                     height={750}
                     className="aspect-[4/3] w-full object-cover transition-transform duration-300 group-hover:scale-[1.04]"
@@ -274,11 +260,11 @@ export default function Home() {
                     {data?.range ?? "—"}
                   </p>
                   <span className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-600">
-                    Empezar a calcular
+                    Calcular
                     <IconArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
                   </span>
                 </div>
-              </TrackedLink>
+              </Link>
             ))}
           </div>
         </Container>
@@ -290,25 +276,25 @@ export default function Home() {
           <div className="max-w-2xl">
             <Badge>Cómo funciona</Badge>
             <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-              Tres pasos, menos de 2 minutos
+              Tres pasos, dos minutos
             </h2>
           </div>
           <div className="mt-10 grid gap-5 md:grid-cols-3">
             {[
               {
                 n: "01",
-                title: "Describe tu reforma",
-                text: "Elige alcance, metros y qué elementos quieres cambiar. Se incluyen preselecciones según tu caso.",
+                title: "Dinos qué vas a cambiar",
+                text: "Alcance, metros y los elementos concretos. Los más habituales ya vienen preseleccionados para que no empieces de cero.",
               },
               {
                 n: "02",
                 title: "Elige la calidad",
-                text: "Acabado básico, medio o premium. El rango se ajusta automáticamente a cada nivel.",
+                text: "Acabado básico, medio o premium. Es lo que más mueve el precio final, así que decide con calma.",
               },
               {
                 n: "03",
-                title: "Consulta tu estimación",
-                text: "Recibe un rango orientativo por m², con desglose de partidas y las hipótesis usadas.",
+                title: "Recibe tu rango",
+                text: "Mínimo, medio y máximo, con el coste por m² y cada partida con su cantidad. Guárdalo para consultarlo más adelante.",
               },
             ].map((s) => (
               <Card key={s.n} className="relative overflow-hidden">
@@ -327,9 +313,9 @@ export default function Home() {
       <section id="ejemplos" className="scroll-mt-20 py-20">
         <Container>
           <div className="max-w-2xl">
-            <Badge>Ejemplos orientativos</Badge>
+            <Badge>Ejemplos</Badge>
             <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-              Cuánto cuestan las reformas más habituales
+              Así se ve un resultado
             </h2>
           </div>
           <div className="mt-10 grid gap-4 md:grid-cols-2">
@@ -353,9 +339,36 @@ export default function Home() {
             ))}
           </div>
           <p className="mt-4 text-sm text-muted-foreground">
-              Ejemplos generados con datos provisionales del prototipo. No son
-              precios de mercado ni presupuestos profesionales.
+              Ejemplos calculados con el mismo motor que usarás tú. Cambia los datos
+              y verás cómo se mueve el rango.
           </p>
+        </Container>
+      </section>
+
+      {/* De dónde salen las cifras */}
+      <section id="metodo" className="scroll-mt-20 border-y border-slate-200/70 bg-white py-16">
+        <Container>
+          <div className="grid gap-8 lg:grid-cols-[0.8fr_1.2fr] lg:items-start">
+            <div>
+              <Badge>El método</Badge>
+              <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900">
+                De dónde salen las cifras
+              </h2>
+            </div>
+            <div className="space-y-4 text-lg leading-8 text-muted-foreground">
+              <p>
+                GoReforma calcula con un catálogo de precios de referencia
+                organizado por partida, unidad y nivel de calidad. Cada estimación
+                muestra el catálogo con el que se ha hecho y las hipótesis aplicadas.
+              </p>
+              <p>
+                El catálogo todavía se está afinando, así que el rango es orientativo
+                y provisional. Lo que sí es exacto es el método: qué partidas entran
+                en el cálculo, con qué cantidad y con qué unidad. Eso es lo que te
+                permite llegar a los presupuestos sabiendo qué preguntar.
+              </p>
+            </div>
+          </div>
         </Container>
       </section>
 
@@ -365,16 +378,15 @@ export default function Home() {
           <div>
             <Badge>Preguntas frecuentes</Badge>
             <h2 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-              Dudas habituales sobre estimaciones
+              Dudas habituales
             </h2>
-            <TrackedLink
+            <Link
               href={`/${calculators[0].slug}`}
-              calculator={calculators[0].id}
               className={buttonVariants({ className: "mt-6" })}
             >
-              Empezar mi estimación
+              Calcular mi reforma
               <IconArrowRight className="size-4" />
-            </TrackedLink>
+            </Link>
           </div>
           <Accordion items={FAQ_ITEMS} />
         </Container>
@@ -389,23 +401,22 @@ export default function Home() {
               className="pointer-events-none absolute -left-20 -top-20 size-64 rounded-full bg-accent-500/40 blur-3xl"
             />
             <h2 className="relative text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Empieza a calcular tu estimación
+              ¿Cuánto costará la tuya?
             </h2>
             <p className="relative mx-auto mt-4 max-w-xl text-lg text-brand-100">
-               Sin pedir tus datos: responde unas preguntas y obtén un rango
-               orientativo para entender la inversión de tu reforma.
+              Gratis, sin registro y en dos minutos. Y si el rango te sorprende,
+              mejor: llegarás a los presupuestos sabiendo qué preguntar.
             </p>
-            <TrackedLink
+            <Link
               href={`/${calculators[0].slug}`}
-              calculator={calculators[0].id}
               className={buttonVariantsInverted({
                 size: "lg",
                 className: "relative mt-8",
               })}
             >
-              Calcular mi reforma ahora
+              Calcular mi reforma gratis
               <IconArrowRight className="size-4" />
-            </TrackedLink>
+            </Link>
           </div>
         </Container>
       </section>

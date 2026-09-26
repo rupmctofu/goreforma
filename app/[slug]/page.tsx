@@ -16,22 +16,6 @@ import { BetaNotice } from "@/components/ui/beta-notice";
 
 export const dynamicParams = false;
 
-const pageImages: Record<string, { src: string; alt: string }> = {
-  bath: { src: "/images/bano.jpg", alt: "Baño reformado con azulejos blancos y lavabo moderno" },
-  kitchen: {
-    src: "/images/cocina.jpg",
-    alt: "Cocina moderna reformada con armarios blancos y encimera de mármol",
-  },
-  integral: {
-    src: "/images/integral.jpg",
-    alt: "Salón reformado con sofá gris junto a gran ventanal",
-  },
-  painting: {
-    src: "/images/pintura.jpg",
-    alt: "Pintor aplicando pintura a una pared con rodillo durante una reforma",
-  },
-};
-
 export function generateStaticParams() {
   return calculators.map((calculator) => ({ slug: calculator.slug }));
 }
@@ -57,12 +41,12 @@ export async function generateMetadata({
       url: `/${calculator.slug}`,
       images: [
         {
-          url: pageImages[calculator.id]?.src,
+          url: calculator.image.src,
           width: 1000,
           height: 750,
-          alt: pageImages[calculator.id]?.alt,
+          alt: calculator.image.alt,
         },
-      ].filter((img) => Boolean(img.url)),
+      ],
     },
   };
 }
@@ -124,7 +108,7 @@ export default async function CalculatorPage({
             <div>
               <Badge>Calculadora</Badge>
               <h1 className="mt-3 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-                {calculator.name}
+                {content.heading}
               </h1>
             </div>
           </div>
@@ -134,18 +118,16 @@ export default async function CalculatorPage({
           <div className="mt-6 max-w-2xl">
             <BetaNotice />
           </div>
-          {pageImages[calculator.id] && (
-            <div className="mt-8 overflow-hidden rounded-3xl border border-slate-200/70 shadow-sm">
-              <Image
-                src={pageImages[calculator.id].src}
-                alt={pageImages[calculator.id].alt}
-                width={1000}
-                height={750}
-                className="h-56 w-full object-cover sm:h-72"
-                sizes="(min-width: 1024px) 80vw, 100vw"
-              />
-            </div>
-          )}
+          <div className="mt-8 overflow-hidden rounded-3xl border border-slate-200/70 shadow-sm">
+            <Image
+              src={calculator.image.src}
+              alt={calculator.image.alt}
+              width={1000}
+              height={750}
+              className="h-56 w-full object-cover sm:h-72"
+              sizes="(min-width: 1024px) 80vw, 100vw"
+            />
+          </div>
         </Container>
       </section>
 

@@ -7,7 +7,7 @@
   },
   "scripts": {
     "dev": "next dev",
-    "build": "prisma migrate deploy && next build",
+    "build": "next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
@@ -23,6 +23,7 @@
     "@neon/env": "^1.4.3",
     "@prisma/client": "^6.19.3",
     "next": "16.3.5",
+    "posthog-js": "^1.434.5",
     "react": "19.2.8",
     "react-dom": "19.2.8"
   },

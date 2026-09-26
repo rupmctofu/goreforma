@@ -72,6 +72,11 @@ export interface QualityFactors {
   PREMIUM: number;
 }
 
+export interface CalculatorImage {
+  src: string;
+  alt: string;
+}
+
 export interface CalculatorDefinition {
   id: string;
   slug: string; // URL, p. ej. "calculadora-reforma-bano"
@@ -79,6 +84,7 @@ export interface CalculatorDefinition {
   category: string; // clave del catálogo, p. ej. "banio"
   shortDescription: string;
   icon: "bathtub" | "kitchen" | "home" | "roller";
+  image: CalculatorImage; // imagen de tarjeta en la home y de cabecera en la ficha
   areaStepId: string;
   qualityStepId: string;
   qualityFactors: QualityFactors;
@@ -119,4 +125,4 @@ export const QUALITY_LABELS: Record<Quality, string> = {
 };
 
 export const DISCLAIMER_ESTIMACION =
-  "Estimación orientativa generada con datos provisionales del prototipo. No es un presupuesto ni debe utilizarse para tomar decisiones económicas.";
+  "Estimación orientativa calculada con un catálogo de precios de referencia que todavía estamos calibrando. No es un presupuesto ni una oferta, y no debe usarse como precio final de la obra.";

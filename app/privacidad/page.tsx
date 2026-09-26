@@ -48,6 +48,16 @@ export default function PrivacidadPage() {
             </p>
           </div>
           <div>
+            <h2 className="font-bold text-slate-900">Analytics opcional</h2>
+            <p className="mt-2">
+              Si aceptas analytics, podremos medir de forma agregada qué partes de la
+              aplicación se utilizan y dónde aparecen errores. No enviamos a analytics
+              tu nombre, email, teléfono, respuestas completas, importes ni enlaces de
+              recuperación. El consentimiento de analytics es independiente del
+              consentimiento para guardar una estimación.
+            </p>
+          </div>
+          <div>
             <h2 className="font-bold text-slate-900">Conservación</h2>
             <p className="mt-2">
               Conservamos los datos únicamente durante el tiempo necesario para

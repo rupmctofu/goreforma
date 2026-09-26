@@ -75,6 +75,10 @@ export const fullRenovationCalculator: CalculatorDefinition = {
   shortDescription:
     "Calcula cuánto puede costar reformar una vivienda por completo según metros y acabados.",
   icon: "home",
+  image: {
+    src: "/images/comedor.jpg",
+    alt: "Comedor reformado con comedor moderno junto a un gran ventanal",
+  },
   areaStepId: "area",
   qualityStepId: "quality",
   qualityFactors: { BASICA: 0.8, MEDIA: 1, PREMIUM: 1.45 },
@@ -89,13 +93,13 @@ export const fullRenovationCalculator: CalculatorDefinition = {
     {
       id: "area",
       title: "Superficie",
-      question: "¿Cuántos m² construidos tiene la vivienda?",
+      question: "¿Cuántos m² tiene la vivienda?",
       fieldType: "number",
       unit: "m²",
       min: 20,
       max: 500,
       placeholder: "P. ej. 80",
-      help: "Indica los metros cuadrados construidos de la vivienda.",
+      help: "Indica los metros construidos, no los útiles con el mobiliario dentro.",
     },
     qualityStep(),
     {
@@ -103,7 +107,7 @@ export const fullRenovationCalculator: CalculatorDefinition = {
       title: "Elementos",
       question: "¿Qué elementos quieres incluir?",
       fieldType: "multi_choice",
-      help: "Puedes ajustar los elementos que vienen preseleccionados según tu alcance.",
+      help: "Hemos marcado lo más habitual para ese alcance. Quita lo que no aplique.",
       options: ELEMENT_OPTIONS,
     },
   ],

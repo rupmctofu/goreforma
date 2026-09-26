@@ -30,7 +30,8 @@
   --color-accent-900: #722714;
   --color-accent-950: #3e1208;
 
-  --font-sans: var(--font-montserrat);
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-jakarta);
 
   --animate-step-in: step-in 240ms cubic-bezier(0.33, 1, 0.68, 1) both;
   --animate-fade-up: fade-up 500ms cubic-bezier(0.33, 1, 0.68, 1) both;
@@ -78,8 +79,26 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-synthesis-weight: none;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
+  }
+
+  /* One display family for every heading level. Keeping this here means the
+     hierarchy is defined once instead of per component. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+
+  /* Prices, ranges and table figures must not shift width between states. */
+  [class*="tabular"],
+  table,
+  time {
+    font-variant-numeric: tabular-nums;
   }
 
   ::selection {

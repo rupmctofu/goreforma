@@ -6,7 +6,7 @@ export function qualityStep(): CalculatorStep {
     title: "Calidad",
     question: "¿Qué calidad buscas?",
     fieldType: "single_choice",
-    help: "La calidad afecta al precio de los materiales y al acabado. Es un factor clave en el coste final.",
+    help: "Es lo que más mueve el precio final. Si no lo tienes claro, empieza por Media: es el acabado más habitual.",
     options: [
       {
         id: "BASICA",

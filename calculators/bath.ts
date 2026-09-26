@@ -75,6 +75,10 @@ export const bathCalculator: CalculatorDefinition = {
   shortDescription:
     "Calcula cuánto puede costar reformar tu baño según metros, calidad y elementos a cambiar.",
   icon: "bathtub",
+  image: {
+    src: "/images/bano.jpg",
+    alt: "Baño reformado con azulejos blancos y lavabo moderno",
+  },
   areaStepId: "area",
   qualityStepId: "quality",
   qualityFactors: { BASICA: 0.75, MEDIA: 1, PREMIUM: 1.55 },
@@ -82,7 +86,7 @@ export const bathCalculator: CalculatorDefinition = {
     {
       id: "scope",
       title: "Alcance",
-      question: "¿Qué quieres hacer?",
+      question: "¿Qué quieres hacer en el baño?",
       fieldType: "single_choice",
       options: SCOPE_OPTIONS,
     },
@@ -103,7 +107,7 @@ export const bathCalculator: CalculatorDefinition = {
       title: "Elementos",
       question: "¿Qué elementos quieres cambiar?",
       fieldType: "multi_choice",
-      help: "Puedes ajustar los elementos que vienen preseleccionados según tu alcance.",
+      help: "Hemos marcado lo más habitual para ese alcance. Quita lo que no aplique.",
       options: ELEMENT_OPTIONS,
     },
   ],

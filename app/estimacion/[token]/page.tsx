@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { getCalculatorById } from "@/calculators/registry";
 import type { EstimationResult } from "@/calculators/types";
 import { ResultView } from "@/components/calculator/result-view";
+import { RecoveryAnalytics } from "@/components/analytics/recovery-analytics";
 import { Container } from "@/components/ui/container";
 import { prisma } from "@/lib/db";
 
@@ -27,20 +28,25 @@ function formatExpiry(date: Date | null): string {
   });
 }
 
+async function findRecoveryEstimation(token: string) {
+  return prisma.estimation.findUnique({
+    where: { recoveryTokenHash: hashToken(token) },
+  });
+}
+
 export default async function EstimationPage({
   params,
 }: {
   params: Promise<{ token: string }>;
 }) {
   const { token } = await params;
-  const estimation = await prisma.estimation.findUnique({
-    where: { recoveryTokenHash: hashToken(token) },
-  });
+  const estimation = await findRecoveryEstimation(token);
 
-  if (
-    !estimation ||
-    (estimation.recoveryTokenExpiresAt && estimation.recoveryTokenExpiresAt < new Date())
-  ) {
+  if (!estimation) {
+    notFound();
+  }
+
+  if (estimation.recoveryTokenExpiresAt && estimation.recoveryTokenExpiresAt < new Date()) {
     notFound();
   }
 
@@ -50,6 +56,7 @@ export default async function EstimationPage({
   return (
     <section className="py-12">
       <Container className="max-w-3xl">
+        <RecoveryAnalytics calculatorId={calculator.id} createdAt={estimation.createdAt.toISOString()} />
         <p className="text-sm font-semibold text-accent-700">Estimación guardada</p>
         <h1 className="mt-2 text-3xl font-extrabold tracking-tight text-slate-900">
           Tu estimación de {calculator.name.toLowerCase()}

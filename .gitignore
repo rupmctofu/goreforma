@@ -35,8 +35,7 @@ yarn-error.log*
 !.env.example
 
 # diseño / assets pesados (se mantienen solo en local)
-grafica/*.ai
-grafica/*.png
+grafica/
 
 # artefactos de sesión opencode
 /telegram_ask_result.txt

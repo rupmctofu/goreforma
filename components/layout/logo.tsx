@@ -1,29 +1,36 @@
 import Link from "next/link";
 import { cn } from "../ui/container";
 
+/**
+ * Símbolo de GoReforma: cuadrado de esquinas redondeadas con el monograma.
+ * Geometría tomada de `grafica/img/logo-goReforma.svg`. Los colores llegan por
+ * token de Tailwind para que el mark siga la paleta del tema.
+ */
 export function LogoMark({ className }: { className?: string }) {
   return (
     <svg
-      viewBox="0 0 61.34 64.1"
+      viewBox="0 0 50.35 50.35"
       className={className}
       aria-hidden="true"
       focusable="false"
     >
-      <circle cx="30.67" cy="32.05" r="30.67" className="fill-accent-500" />
+      <rect
+        x="0"
+        y="0"
+        width="50.35"
+        height="50.35"
+        rx="11.55"
+        ry="11.55"
+        className="fill-accent-500"
+      />
+      <polygon
+        className="fill-white"
+        points="39.83,27.09 25.18,12.44 10.53,27.09 7.7,24.26 25.18,6.78 42.66,24.26"
+      />
       <path
         className="fill-white"
-        d="M49.02,34.1c-1.82-7.79-11.19-10.8-16.67-4.6-.59.66-.98,1.43-1.49,2.11-.07.09-.1.22-.25.18-1.57-2.69-4.22-5.17-7.45-5.53-5.27-.59-9.67,2.77-10.86,7.84-1.46,6.24,2.11,10.86,6.3,14.93,1.21,1.17,2.47,2.29,3.75,3.39s3.27.19,3.27-1.5v-12.44h10.08v12.38c0,1.7,2,2.61,3.28,1.49.74-.65,1.47-1.3,2.2-1.97,4.76-4.35,9.5-9.17,7.84-16.28Z"
+        d="M25.17,42.74c-6.79,0-12.31-5.52-12.31-12.31v-10.25h4v10.25c0,4.58,3.73,8.31,8.31,8.31,3.89,0,7.17-2.69,8.06-6.31h-7.44v-4h11.68v2c0,6.79-5.52,12.31-12.31,12.31Z"
       />
-      <g
-        fill="none"
-        stroke="#fff"
-        strokeWidth="6"
-        strokeLinecap="round"
-        strokeMiterlimit="10"
-      >
-        <line x1="11.97" y1="23.15" x2="30.67" y2="14.76" />
-        <line x1="49.36" y1="23.15" x2="30.67" y2="14.76" />
-      </g>
     </svg>
   );
 }
@@ -44,9 +51,9 @@ export function Logo({
       )}
       aria-label="GoReforma — inicio"
     >
-      <LogoMark className="size-9 shrink-0" />
+      <LogoMark className="size-7 shrink-0" />
       <span className="text-lg">
-        <span className={variant === "light" ? "text-white" : "text-brand-900"}>
+        <span className={variant === "light" ? "text-white" : "text-brand-800"}>
           Go
         </span>
         <span className="text-accent-500">Reforma</span>

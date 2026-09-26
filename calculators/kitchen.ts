@@ -76,6 +76,10 @@ export const kitchenCalculator: CalculatorDefinition = {
   shortDescription:
     "Calcula cuánto puede costar reformar tu cocina según metros, acabados y electrodomésticos.",
   icon: "kitchen",
+  image: {
+    src: "/images/cocina.jpg",
+    alt: "Cocina moderna reformada con armarios blancos y encimera de mármol",
+  },
   areaStepId: "area",
   qualityStepId: "quality",
   qualityFactors: { BASICA: 0.75, MEDIA: 1, PREMIUM: 1.5 },
@@ -83,7 +87,7 @@ export const kitchenCalculator: CalculatorDefinition = {
     {
       id: "scope",
       title: "Alcance",
-      question: "¿Qué quieres hacer?",
+      question: "¿Qué quieres cambiar en la cocina?",
       fieldType: "single_choice",
       options: SCOPE_OPTIONS,
     },
@@ -104,7 +108,7 @@ export const kitchenCalculator: CalculatorDefinition = {
       title: "Elementos",
       question: "¿Qué elementos quieres cambiar?",
       fieldType: "multi_choice",
-      help: "Puedes ajustar los elementos que vienen preseleccionados según tu alcance.",
+      help: "Hemos marcado lo más habitual para ese alcance. Quita lo que no aplique.",
       options: ELEMENT_OPTIONS,
     },
   ],

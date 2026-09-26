@@ -34,3 +34,19 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+### Database migrations are NOT applied by `npm run build`
+
+`npm run build` runs `next build` only. It deliberately does **not** run
+`prisma migrate deploy`, so a build never mutates the database.
+
+**Apply migrations in a separate step that runs before the deploy**, e.g. a CI
+job or a pre-deploy hook:
+
+```bash
+npm run db:deploy   # prisma migrate deploy
+```
+
+If you skip this, schema drift is not caught at build time — it surfaces as a
+runtime failure in the API routes. This is a conscious trade-off, not an
+oversight: keep the migration step wired into your pipeline.

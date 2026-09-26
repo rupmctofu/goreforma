@@ -8,10 +8,13 @@ import type {
 } from "@/calculators/types";
 import { getCalculatorById } from "@/calculators/registry";
 import {
-  trackCalculatorCompleted,
-  trackCalculatorStarted,
+  trackCalculatorView,
+  trackCalculatorStart,
   trackCalculatorStepCompleted,
-  trackResultViewed,
+  trackCalculatorValidationError,
+  trackEstimationCreated,
+  trackEstimationFailed,
+  trackEstimationViewed,
 } from "@/lib/analytics";
 import { cn } from "../ui/container";
 import { Button } from "../ui/button";
@@ -43,7 +46,67 @@ function stepIsValid(step: CalculatorStep, answers: Record<string, AnswerValue>)
     if (step.max !== undefined && n > step.max) return false;
     return n > 0;
   }
-  return true;
+  return Array.isArray(value);
+}
+
+type ValidationIssue = { field: string; errorType: string; message: string };
+
+function getValidationIssue(
+  calculator: NonNullable<ReturnType<typeof getCalculatorById>>,
+  step: CalculatorStep,
+  answers: Record<string, AnswerValue>,
+): ValidationIssue | null {
+  const value = answers[step.id];
+  const isSpecialPaint =
+    calculator.id === "painting" &&
+    Array.isArray(answers.elements) &&
+    answers.elements.includes("pintura_especial");
+
+  if (step.optional && (value === undefined || value === null || value === "")) {
+    if (step.id === "special_area" && isSpecialPaint) {
+      return {
+        field: step.id,
+        errorType: "dependency",
+        message: "Indica cuántos m² de baño o cocina vas a pintar con pintura especial.",
+      };
+    }
+    return null;
+  }
+
+  if (step.fieldType === "single_choice" && !stepIsValid(step, answers)) {
+    return { field: step.id, errorType: "required", message: "Selecciona una opción para continuar." };
+  }
+
+  if (step.fieldType === "number") {
+    const numeric = parseNumber(value);
+    if (numeric === null) {
+      return { field: step.id, errorType: "invalid_number", message: "Introduce un número válido." };
+    }
+    if (step.min !== undefined && numeric < step.min) {
+      return { field: step.id, errorType: "below_min", message: `El valor mínimo es ${step.min}.` };
+    }
+    if (step.max !== undefined && numeric > step.max) {
+      return { field: step.id, errorType: "above_max", message: `El valor máximo es ${step.max}.` };
+    }
+    if (numeric <= 0) {
+      return { field: step.id, errorType: "below_min", message: "Introduce un valor mayor que cero." };
+    }
+    if (step.id === "special_area" && isSpecialPaint) {
+      const area = parseNumber(answers.area);
+      if (area !== null && numeric > area) {
+        return {
+          field: step.id,
+          errorType: "dependency",
+          message: "La superficie especial no puede ser mayor que la superficie total.",
+        };
+      }
+    }
+  }
+
+  if (!stepIsValid(step, answers)) {
+    return { field: step.id, errorType: "invalid_value", message: "Revisa este campo para continuar." };
+  }
+  return null;
 }
 
 function answerSummary(
@@ -78,24 +141,32 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
   const [calculationErrors, setCalculationErrors] = useState<string[]>([]);
   const [isCalculating, setIsCalculating] = useState(false);
   const [elementsTouched, setElementsTouched] = useState(false);
+  const hasSentView = useRef(false);
   const hasSentStart = useRef(false);
 
   const step = steps[stepIndex];
 
   useEffect(() => {
-    if (hasSentStart.current) return;
-    hasSentStart.current = true;
-    if (calculator) trackCalculatorStarted(calculator.id);
+    if (hasSentView.current || !calculator) return;
+    hasSentView.current = true;
+    trackCalculatorView(calculator.id);
   }, [calculator]);
 
-  const currentValid = useMemo(
-    () => (calculator ? stepIsValid(step, answers) : false),
-    [calculator, step, answers],
-  );
+  function markCalculatorStarted() {
+    if (hasSentStart.current || !calculator) return;
+    hasSentStart.current = true;
+    trackCalculatorStart(calculator.id);
+  }
+
+  useEffect(() => {
+    if (!calculator || !estimate || !estimationId) return;
+    trackEstimationViewed(calculator.id, "new");
+  }, [calculator, estimate, estimationId]);
 
   const progress = ((stepIndex + 1) / steps.length) * 100;
 
   function setAnswer(value: AnswerValue) {
+    markCalculatorStarted();
     const getDefaultElements = calculator?.getDefaultElements;
     setAnswers((a) => {
       const next = { ...a, [step.id]: value };
@@ -111,6 +182,7 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
   }
 
   function toggleElement(id: string) {
+    markCalculatorStarted();
     setElementsTouched(true);
     const current = Array.isArray(answers[step.id]) ? (answers[step.id] as string[]) : [];
     setAnswers((a) => ({
@@ -131,22 +203,39 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
   }
 
   async function goNext() {
+    if (!calculator || !step) return;
+
+    const issue = getValidationIssue(calculator, step, answers);
+    if (issue) {
+      trackCalculatorValidationError({
+        calculatorId: calculator.id,
+        stepId: step.id,
+        field: issue.field,
+        errorType: issue.errorType,
+      });
+      setCalculationErrors([issue.message]);
+      return;
+    }
+
+    const outcome =
+      step.optional && (answers[step.id] === undefined || answers[step.id] === "")
+        ? "skipped"
+        : "completed";
+    trackCalculatorStepCompleted({
+      calculatorId: calculator.id,
+      stepId: step.id,
+      stepIndex,
+      stepCount: steps.length,
+      outcome,
+    });
+
     if (stepIndex < steps.length - 1) {
-      if (calculator && step) {
-        trackCalculatorStepCompleted({
-          calculator: calculator.id,
-          step: step.id,
-          stepIndex,
-          totalSteps: steps.length,
-          progress: ((stepIndex + 1) / steps.length) * 100,
-        });
-      }
       setStepIndex(stepIndex + 1);
       return;
     }
-    if (!calculator) return;
     setCalculationErrors([]);
     setIsCalculating(true);
+    let failureTracked = false;
     try {
       const response = await fetch("/api/estimations", {
         method: "POST",
@@ -159,26 +248,51 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
         recoveryUrl?: string;
         error?: string;
         errors?: Record<string, string>;
+        algorithmVersion?: string;
       };
       if (!response.ok || !payload.result) {
+        const statusClass = response.status >= 500 ? "5xx" : response.status >= 400 ? "4xx" : "network";
         if (response.status === 429) {
+          trackEstimationFailed({ calculatorId: calculator.id, errorType: "rate_limit", statusClass });
+          failureTracked = true;
           throw new Error("Has enviado demasiadas peticiones. Espera un minuto e inténtalo de nuevo.");
         }
         if (response.status === 413) {
+          trackEstimationFailed({ calculatorId: calculator.id, errorType: "payload_too_large", statusClass });
+          failureTracked = true;
           throw new Error("La petición es demasiado grande. Revisa los datos e inténtalo de nuevo.");
         }
         if (payload.errors && Object.keys(payload.errors).length > 0) {
+          for (const field of Object.keys(payload.errors)) {
+            trackCalculatorValidationError({
+              calculatorId: calculator.id,
+              stepId: field,
+              field,
+              errorType: "server_validation",
+            });
+          }
           setCalculationErrors(Object.values(payload.errors));
+          trackEstimationFailed({ calculatorId: calculator.id, errorType: "validation", statusClass });
+          failureTracked = true;
           throw new Error("Corrige los errores del formulario para continuar.");
         }
+        trackEstimationFailed({ calculatorId: calculator.id, errorType: "server", statusClass });
+        failureTracked = true;
         throw new Error(payload.error ?? "No se pudo calcular la estimación.");
       }
       setEstimate(payload.result);
       setEstimationId(payload.id ?? null);
       setRecoveryUrl(payload.recoveryUrl ?? null);
-      trackCalculatorCompleted(calculator.id);
-      trackResultViewed(calculator.id);
+      trackEstimationCreated({
+        calculatorId: calculator.id,
+        catalogVersion: payload.result.catalogVersion,
+        algorithmVersion: payload.algorithmVersion ?? "prototype-0",
+        breakdownCount: payload.result.breakdown.length,
+      });
     } catch (error) {
+      if (!failureTracked) {
+        trackEstimationFailed({ calculatorId: calculator.id, errorType: "network", statusClass: "network" });
+      }
       const message = error instanceof Error ? error.message : "No se pudo calcular la estimación. Inténtalo de nuevo.";
       setCalculationErrors((prev) => (prev.length > 0 ? prev : [message]));
     } finally {
@@ -199,7 +313,11 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
           />
         </div>
         <div className="text-center">
-          <Button variant="ghost" onClick={goBack}>
+          <p className="mx-auto max-w-md text-sm leading-6 text-muted-foreground">
+            ¿El rango te parece alto o bajo? Vuelve atrás y cambia el acabado o los
+            metros para compararlo.
+          </p>
+          <Button variant="ghost" onClick={goBack} className="mt-2">
             <IconArrowLeft className="size-4" />
             Volver a ajustar
           </Button>
@@ -208,7 +326,7 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
         <div id="guardar-estimacion" className="scroll-mt-24">
           <div className="mb-4 flex items-center justify-between">
             <h2 className="text-xl font-extrabold tracking-tight text-slate-900">
-              Guardar tu estimación
+              Guarda esta estimación
             </h2>
             <span className="hidden text-sm text-muted-foreground sm:block">
               Opcional · solo con email
@@ -419,7 +537,7 @@ export function CalculatorShell({ calculatorId }: { calculatorId: string }) {
           variant="primary"
           size="lg"
           onClick={goNext}
-          disabled={!currentValid || isCalculating}
+          disabled={isCalculating}
         >
           {isCalculating
             ? "Calculando…"

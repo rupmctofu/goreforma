@@ -96,7 +96,7 @@ export function ResultView({
         </StepBadge>
 
         <h2 className="mt-4 text-sm font-semibold uppercase tracking-wide text-slate-500">
-          Estimación orientativa
+          Rango estimado
         </h2>
 
         <div className="mt-2 flex flex-wrap items-baseline justify-center gap-x-3 gap-y-1">
@@ -110,12 +110,18 @@ export function ResultView({
         </div>
 
         <p className="mt-2 text-sm text-muted-foreground">
-          Rango calculado a partir de los datos que has indicado. Estimación media{" "}
+          Estimación media{" "}
           <span className="font-semibold text-slate-800">
             {formatEUR(roundToStep(estimate.avg))}
           </span>{" "}
           · {formatEUR(roundToStep(estimate.perM2.min))} –{" "}
           {formatEUR(roundToStep(estimate.perM2.max))} por m²
+        </p>
+
+        <p className="mx-auto mt-4 max-w-lg text-sm leading-6 text-slate-600">
+          Una referencia para entender el orden de magnitud de tu reforma y qué
+          partidas están detrás del total. Cambia el acabado o los metros para ver
+          cómo se mueve el rango.
         </p>
 
         <RangeBar estimate={estimate} />
@@ -199,6 +205,19 @@ export function ResultView({
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="rounded-[2rem] border border-slate-200 bg-white p-6 sm:p-8">
+        <h3 className="text-lg font-bold text-slate-900">
+          Por qué un rango y no un número
+        </h3>
+        <p className="mt-3 text-sm leading-6 text-muted-foreground">
+          El precio de una reforma depende de cosas que no entran en un formulario:
+          el estado de las instalaciones, el acceso a la vivienda, la zona y el
+          criterio de cada profesional. Por eso damos un rango en lugar de una cifra
+          cerrada. Sirve para saber qué partidas dominan el coste y qué preguntar en
+          cada presupuesto.
+        </p>
       </div>
 
       <div className="rounded-[2rem] border border-slate-200 bg-white p-6 sm:p-8">

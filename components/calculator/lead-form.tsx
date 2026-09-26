@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
-import { trackLeadFormStarted, trackLeadSubmitted } from "@/lib/analytics";
+import { trackLeadStarted, trackLeadSubmissionFailed, trackLeadSubmitted } from "@/lib/analytics";
 import { Button } from "../ui/button";
 import { IconCheck } from "../icons";
 
@@ -29,11 +29,13 @@ export function LeadForm({ calculatorId, calculatorName, estimationId }: LeadFor
   const [errors, setErrors] = useState<Errors>({});
   const [status, setStatus] = useState<"idle" | "submitting" | "done" | "error">("idle");
   const [consentGiven, setConsentGiven] = useState(false);
+  const hasStarted = useRef(false);
 
-  useEffect(() => {
-    trackLeadFormStarted(calculatorId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  function markStarted() {
+    if (hasStarted.current) return;
+    hasStarted.current = true;
+    trackLeadStarted(calculatorId, "new");
+  }
 
   function set<K extends keyof typeof form>(key: K, value: string) {
     setForm((f) => ({ ...f, [key]: value }));
@@ -56,6 +58,7 @@ export function LeadForm({ calculatorId, calculatorName, estimationId }: LeadFor
     if (Object.keys(next).length > 0) return;
 
     setStatus("submitting");
+    let failureTracked = false;
     try {
       const res = await fetch("/api/leads", {
         method: "POST",
@@ -71,10 +74,34 @@ export function LeadForm({ calculatorId, calculatorName, estimationId }: LeadFor
           website: form.website,
         }),
       });
-      if (!res.ok) throw new Error("error");
-      trackLeadSubmitted(calculatorId);
+      if (!res.ok) {
+        trackLeadSubmissionFailed({
+          calculatorId,
+          errorType: res.status === 429 ? "rate_limit" : res.status >= 500 ? "server" : "validation",
+          statusClass: res.status >= 500 ? "5xx" : "4xx",
+        });
+        failureTracked = true;
+        throw new Error("error");
+      }
+      if (res.status !== 201) {
+        trackLeadSubmissionFailed({
+          calculatorId,
+          errorType: "unexpected_status",
+          statusClass: "2xx",
+        });
+        failureTracked = true;
+        throw new Error("error");
+      }
+      trackLeadSubmitted(calculatorId, "new");
       setStatus("done");
     } catch {
+      if (!failureTracked) {
+        trackLeadSubmissionFailed({
+          calculatorId,
+          errorType: "network",
+          statusClass: "network",
+        });
+      }
       setStatus("error");
     }
   }
@@ -87,22 +114,26 @@ export function LeadForm({ calculatorId, calculatorName, estimationId }: LeadFor
         </span>
         <p className="mt-4 text-lg font-bold text-slate-900">Estimación guardada</p>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          Hemos asociado tus datos a la estimación de <strong>{calculatorName}</strong>.
-          No se enviarán presupuestos ni contactos profesionales automáticamente.
-          Guarda el enlace de esta página si quieres volver a consultar la estimación.
+          Hemos asociado tu email a la estimación de <strong>{calculatorName}</strong>.
+          Guarda el enlace de esta página: es lo que te permitirá volver a consultarla
+          cuando quieras. No te escribimos ni te llamamos.
         </p>
       </div>
     );
   }
 
   return (
-    <form onSubmit={onSubmit} className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8" noValidate>
+    <form
+      onSubmit={onSubmit}
+      onFocusCapture={markStarted}
+      className="rounded-2xl border border-slate-200 bg-white p-6 sm:p-8"
+      noValidate
+    >
       <div>
-        <h3 className="text-lg font-bold text-slate-900">Guarda tu estimación</h3>
+        <h3 className="text-lg font-bold text-slate-900">Guarda esta estimación</h3>
         <p className="mt-1 text-sm leading-6 text-muted-foreground">
-          Es opcional: tu rango ya está en pantalla. Si dejas tu email guardamos
-          tus datos junto a esta estimación. La recuperación sigue siendo a través
-          del enlace de esta página.
+          Ya tienes el resultado en pantalla. Si quieres conservarlo, deja tu email
+          y podrás volver a consultarlo mediante el enlace de esta estimación.
         </p>
       </div>
 
@@ -205,7 +236,8 @@ export function LeadForm({ calculatorId, calculatorName, estimationId }: LeadFor
       </Button>
 
       <p className="mt-3 text-center text-xs text-muted-foreground">
-        Sin compromiso. Solo usaremos tus datos para este trámite y nunca los venderemos.
+        Sin compromiso. No vendemos tus datos ni los cedemos a terceros. Consulta la{" "}
+        <Link href="/privacidad" className="underline">política de privacidad</Link>.
       </p>
 
       {status === "error" && (

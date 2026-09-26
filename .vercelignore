@@ -1,4 +1,11 @@
+# Entorno local: nunca se sube ni a Git ni al build de Vercel.
 .env
 .env.local
 .env.*
 !.env.example
+
+# Artefactos de desarrollo que no aportan nada al build.
+.agents
+skills-lock.json
+telegram_ask_result.txt
+grafica
