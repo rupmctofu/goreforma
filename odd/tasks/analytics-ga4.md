@@ -32,7 +32,7 @@ Also noted, not fixed (pre-existing design, not regressions):
 
 ## Commits
 
-- `<hash>` feat: GA4 analytics contract, UTM attribution and lead funnel tracking
+- `862e09c` feat: GA4 analytics contract, UTM attribution and lead funnel tracking
 
 ## Notes
 
